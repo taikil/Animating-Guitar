@@ -30,12 +30,13 @@ private:
 	Player player = Player();
 	vec2 mInitialMousePos;
 	quat mRotationQuat;
+	vec3 eyePos = vec3(0, 0, -5);
 };
 
 void GuitarApp::setup()
 {
-	//setWindowSize(1600, 1200);
-	mCam.lookAt(vec3(0, 0, 5), vec3(0));
+	setWindowSize(1920, 1080);
+	mCam.lookAt(eyePos, vec3(0));
 	mCam.setPerspective(60.0f, getWindowAspectRatio(), 0.1f, 1000.0f);
 	mRotationQuat = quat();
 
@@ -62,7 +63,7 @@ void GuitarApp::mouseDrag(MouseEvent event) {
 	mRotationQuat = rotationQuat * mRotationQuat;
 
 	// Adjust the camera's position to rotate around the point of interest
-	vec3 eye = mRotationQuat * vec3(0, 0, -5); // Eye position relative to target
+	vec3 eye = mRotationQuat * eyePos; // Eye position relative to target
 	vec3 target = vec3(0); // Your point of interest
 	mCam.lookAt(eye + target, target); // Update camera's lookAt and eye positions
 	mInitialMousePos = event.getPos();
@@ -74,7 +75,7 @@ void GuitarApp::update()
 
 void GuitarApp::draw()
 {
-	gl::clear();
+	gl::clear(Color(0.043, 0.161, 0.29));
 	gl::enableDepthRead();
 	gl::enableDepthWrite();
 

@@ -106,9 +106,11 @@
     <ClCompile Include="..\src\GuitarApp.cpp" />
     <ClCompile Include="MusicSimulator.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Trapezoid.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h" />
+    <ClInclude Include="Trapezoid.h" />
     <ClInclude Include="MusicSimulator.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>
