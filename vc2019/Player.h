@@ -3,7 +3,7 @@
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
-#include "Trapezoid.h"
+#include "Helpers.h"
 
 
 using namespace ci;
@@ -20,6 +20,7 @@ public:
 
 	gl::BatchRef mRect;
 	gl::BatchRef mFingers[4][3];
+	gl::BatchRef mThumb[3];
 
 private:
 	vec3 handPos;
@@ -27,5 +28,7 @@ private:
 	//Finger names: Index: i, Middle: m, Ring: r, Pinky: p, Thumb: t
 	vec4 fingerLen = vec4(0.9, 1.0, 0.95, 0.7);
 	vec3 knuckleLen = vec3(0.4, 0.4, 0.2);
+	vec3 thumbKnuckleLen = vec3(0.1, 0.4, 0.3);
+	float thumbLen = 0.7;
 };
 
