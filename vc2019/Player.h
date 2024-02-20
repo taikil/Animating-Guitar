@@ -18,5 +18,9 @@ public:
 
 
 	gl::BatchRef mRect;
+
+private:
+	vec3 handPos;
+	vec3 fingerPos;
 };
 
