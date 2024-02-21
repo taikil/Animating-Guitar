@@ -31,6 +31,18 @@ void Hand::setup() {
 		auto thumb = geom::Capsule().subdivisionsAxis(10).subdivisionsHeight(10).length(thumbKnuckleLen[i] * thumbLen).radius(0.12f);
 		mThumb[i] = gl::Batch::create(thumb, shader);
 	}
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 3; j++) {
+			fingerFlexion[i][j] = float(M_PI / 3) * knuckleLen[j];
+		}
+	}
+
+	//Switch for right hand
+	(rightHand) ? thumbBaseTranslate.x = -thumbBaseTranslate.x : void();
+	(rightHand) ? thumbBaseRotation = -thumbBaseRotation : void();
+	(rightHand) ? thumbJointTranslate.x = -thumbJointTranslate.x : void();
+	(rightHand) ? thumbJointRotation = -thumbJointRotation : void();
 }
 
 void Hand::update() {
@@ -80,7 +92,7 @@ void Hand::draw() {
 					for (int j = 0; j < 3; j++) {
 						gl::pushModelMatrix(); // 3x
 						{
-							Helpers::rotateFromBase(float(M_PI / 4) * knuckleLen[j], vec3(1, 0, 0), vec3(0, 0.5 * (knuckleLen[j] * fingerLen[i] - 0.1), 0));
+							Helpers::rotateFromBase(fingerFlexion[i][j], vec3(1, 0, 0), vec3(0, 0.5 * (knuckleLen[j] * fingerLen[i] - 0.1), 0));
 							mFingers[i][j]->draw();
 							gl::translate(0, knuckleLen[j] * fingerLen[i], 0);
 						}
@@ -95,26 +107,21 @@ void Hand::draw() {
 		{
 			gl::pushModelMatrix(); // Base of thumb
 			{
-				vec3 thumbTrans = (rightHand) ? vec3(0.4, 0, 0) : vec3(-0.4, 0, 0);
-				gl::translate(thumbTrans);
-				float thumbRotation = (rightHand) ? -(M_PI / 3) : (M_PI / 3);
-				Helpers::rotateFromBase(thumbRotation, vec3(0, 1, 1), vec3(0, 0, 0));
-				gl::scale(1.2, 2, 1.2);
+				gl::translate(thumbBaseTranslate);
+				Helpers::rotateFromBase(thumbBaseRotation, vec3(0, 1, 1), vec3(0, 0, 0));
+				gl::scale(1.2, 2, 1.2); // hand shape
 				mThumb[0]->draw();
 			}
 			gl::popModelMatrix();
 
-			vec3 thumbTrans = (rightHand) ? vec3(0.4, 0.2, 0) : vec3(-0.4, 0.2, 0);
-			gl::translate(thumbTrans);
-			float thumbJointRotation = (rightHand) ? -(M_PI / 3) : (M_PI / 3);
+			gl::translate(thumbJointTranslate);
 			Helpers::rotateFromBase(thumbJointRotation, vec3(0, 0, 1), vec3(0, 0.25, 0));
-			float thumbTipRotation = (rightHand) ? -(M_PI / 6) : (M_PI / 6);
-			Helpers::rotateFromBase((M_PI / 6), vec3(1, 0, 0), vec3(0, 0.25, 0));
+			Helpers::rotateFromBase(thumbTipRotation, vec3(1, 0, 0), vec3(0, 0.25, 0));
 			mThumb[1]->draw();
 			gl::pushModelMatrix();
 			{
-				gl::translate(0, 0.4, 0);
-				Helpers::rotateFromBase((M_PI / 6), vec3(1, 0, 0), vec3(0, 0.25, 0));
+				gl::translate(thumbTipTranslate);
+				Helpers::rotateFromBase(thumbTipRotation, vec3(1, 0, 0), vec3(0, 0.25, 0));
 				mThumb[2]->draw();
 			}
 			gl::popModelMatrix();
