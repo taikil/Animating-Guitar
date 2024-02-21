@@ -4,6 +4,7 @@
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
 #include "Helpers.h"
+#include "Hand.h"
 
 
 using namespace ci;
@@ -23,6 +24,8 @@ public:
 	gl::BatchRef mThumb[3];
 
 private:
+	Hand lHand = Hand(false);
+	Hand rHand = Hand(true);
 	vec3 handPos;
 	vec3 fingerPos;
 	//Finger names: Index: i, Middle: m, Ring: r, Pinky: p, Thumb: t
