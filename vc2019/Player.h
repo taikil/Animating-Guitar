@@ -17,15 +17,24 @@ public:
 	void update();
 	void draw();
 	void popN(int n);
+	void drawBody();
+	void drawHead();
+	void drawArms();
+	void drawHands();
 
 
-	gl::BatchRef	mSphere;
+	gl::BatchRef	mBody;
+	gl::BatchRef	mHead;
+	gl::BatchRef	mArmR[2];
+	gl::BatchRef	mArmL[2];
+	gl::BatchRef	mLegs[4];
 	//gl::BatchRef mFingers[4][3];
 	//gl::BatchRef mThumb[3];
 
 private:
 	Hand lHand = Hand(false);
 	Hand rHand = Hand(true);
+	float armLen = 1.0;
 	vec3 handPos = vec3(0, 0, 0);
 	vec3 fingerPos = vec3(0, 0, 0);
 	//Finger names: Index: i, Middle: m, Ring: r, Pinky: p, Thumb: t

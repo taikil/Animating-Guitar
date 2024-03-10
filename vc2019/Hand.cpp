@@ -11,7 +11,7 @@ void Hand::setup() {
 	auto lambert = gl::ShaderDef().lambert().color();
 	gl::GlslProgRef shader = gl::getStockShader(lambert);
 
-	auto palm= geom::Cube().size(0.6, 0.8, 0.2);
+	auto palm = geom::Cube().size(0.6, 0.8, 0.2);
 	mRect = gl::Batch::create(palm, shader);
 
 	//4 fingers
@@ -49,9 +49,11 @@ void Hand::update() {
 }
 
 void Hand::draw() {
+	gl::pushModelMatrix();
 	{
-		gl::pushModelMatrix();
 		//Palm
+
+		gl::scale(1, -1, 1);  // Mirroring about the y-axis
 		if (rightHand) {
 			gl::color(0.1, 0, 0.5);
 		}
@@ -81,9 +83,8 @@ void Hand::draw() {
 		gl::popModelMatrix();
 
 		//Fingers
+		gl::pushModelMatrix();
 		{
-
-			gl::pushModelMatrix();
 			gl::translate(-0.4, 0, 0);
 			for (int i = 0; i < 4; i++) {
 				gl::pushModelMatrix(); //1x
@@ -101,7 +102,8 @@ void Hand::draw() {
 				popN(4); //1x + 3x
 			}
 		}
-		popN(2);
+		gl::popModelMatrix();
+
 		//Thumb
 		gl::pushModelMatrix();
 		{
@@ -125,10 +127,10 @@ void Hand::draw() {
 				mThumb[2]->draw();
 			}
 			gl::popModelMatrix();
-
 		}
 		gl::popModelMatrix();
 	}
+	gl::popModelMatrix();
 }
 
 void Hand::popN(int n) {
