@@ -11,8 +11,8 @@ void Hand::setup() {
 	auto lambert = gl::ShaderDef().lambert().color();
 	gl::GlslProgRef shader = gl::getStockShader(lambert);
 
-	auto capsule = geom::Cube().size(0.6, 0.8, 0.2);
-	mRect = gl::Batch::create(capsule, shader);
+	auto palm= geom::Cube().size(0.6, 0.8, 0.2);
+	mRect = gl::Batch::create(palm, shader);
 
 	//4 fingers
 	for (int i = 0; i < 4; i++) {

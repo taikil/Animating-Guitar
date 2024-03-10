@@ -104,6 +104,7 @@
   <ItemGroup />
   <ItemGroup>
     <ClCompile Include="..\src\GuitarApp.cpp" />
+    <ClCompile Include="GuitarModel.cpp" />
     <ClCompile Include="Hand.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="MusicSimulator.cpp" />
@@ -111,6 +112,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h" />
+    <ClInclude Include="GuitarModel.h" />
     <ClInclude Include="Hand.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="MusicSimulator.h" />
