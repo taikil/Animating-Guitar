@@ -73,7 +73,7 @@ void GuitarApp::mouseDrag(MouseEvent event) {
 		vec2 mouseDelta = vec2(event.getPos()) - mInitialMousePos;
 
 		// Adjust the camera's position based on the mouse movement for zooming
-		float zoomSpeed = 0.1f;
+		float zoomSpeed = 0.01f;
 		eyePos.z += mouseDelta.y * zoomSpeed;
 
 		// Ensure that the camera does not go too close or too far

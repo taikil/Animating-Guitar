@@ -51,18 +51,15 @@ void Player::drawBody() {
 	gl::popModelMatrix();
 }
 
-void Player::drawHands() {
+void Player::drawHands(bool right) {
 	gl::pushModelMatrix();
 	{
-		gl::translate(4, 0.5, 0);
-		lHand.draw();
-	}
-	gl::popModelMatrix();
-
-	gl::pushModelMatrix();
-	{
-		gl::translate(-4, 0.5, 0);
-		rHand.draw();
+		if (right) {
+			rHand.draw();
+		}
+		else {
+			lHand.draw();
+		}
 	}
 	gl::popModelMatrix();
 }
@@ -77,62 +74,78 @@ void Player::drawHead() {
 	gl::popModelMatrix();
 }
 
+void Player::drawArms() {
+
+	//Right Arm
+	gl::pushModelMatrix();
+	{
+		gl::translate(-1.1, 0, 0);
+		Helpers::rotateFromBase(float(M_PI / 2), vec3(0, 0, 1), vec3(0.666, 0, 0)); // T - pose
+		Helpers::rotateFromBase(float(upperArmRRot.x), vec3(1, 0, 0), vec3(0, 0.666, 0));
+		gl::rotate(angleAxis(float(upperArmRRot.y), vec3(0, 1, 0)));
+		Helpers::rotateFromBase(float(upperArmRRot.z), vec3(0, 0, 1), vec3(0, 0.666, 0));
+		gl::pushModelMatrix();
+		{
+			mArmR[0]->draw();
+		}
+		gl::popModelMatrix();
+		gl::pushModelMatrix();
+		{
+			gl::translate(0, 1.333, 0);
+			Helpers::rotateFromBase(float(M_PI / 6), vec3(1, 0, 0), vec3(0, 0.666, 0));
+			Helpers::rotateFromBase(float(M_PI / 12), vec3(0, 1, 0), vec3(0, 0, 0));
+			mArmR[1]->draw();
+			gl::pushModelMatrix();
+			{
+				gl::translate(0, 1, 0);
+				drawHands(true);
+			}
+			gl::popModelMatrix();
+		}
+		gl::popModelMatrix();
+	}
+	gl::popModelMatrix();
+
+	//Left Arm
+	gl::pushModelMatrix();
+	{
+		gl::translate(1.1, 0, 0);
+		Helpers::rotateFromBase(float(-M_PI / 2), vec3(0, 0, 1), vec3(-0.666, 0, 0)); // T - pose
+		Helpers::rotateFromBase(float(upperArmLRot.x), vec3(1, 0, 0), vec3(0, 0.666, 0));
+		gl::rotate(angleAxis(float(upperArmLRot.y), vec3(0, 1, 0)));
+		Helpers::rotateFromBase(float(upperArmLRot.z), vec3(0, 0, 1), vec3(0, 0.666, 0));
+		gl::pushModelMatrix();
+		{
+			mArmL[0]->draw();
+		}
+		gl::popModelMatrix();
+		gl::pushModelMatrix();
+		{
+			gl::translate(0, 1.333, 0);
+			Helpers::rotateFromBase(float(upperArmLRot.x), vec3(1, 0, 0), vec3(0, 0.666, 0));
+			gl::rotate(angleAxis(float(upperArmLRot.y), vec3(0, 1, 0)));
+			Helpers::rotateFromBase(float(upperArmLRot.z), vec3(0, 0, 1), vec3(0, 0.666, 0));
+			mArmL[1]->draw();
+			gl::pushModelMatrix();
+			{
+				gl::translate(0, 0.9, 0);
+				drawHands(false);
+			}
+			gl::popModelMatrix();
+		}
+		gl::popModelMatrix();
+	}
+	gl::popModelMatrix();
+}
+
 void Player::draw() {
 	gl::pushModelMatrix();
 	{
 		//drawHands();
 		drawBody();
 		drawHead();
+		drawArms();
 
-		gl::pushModelMatrix();
-		{
-			gl::translate(-1, 0, 0);
-			Helpers::rotateFromBase(float(M_PI / 2), vec3(0, 0, 1), vec3(0.666, 0, 0));
-			gl::pushModelMatrix();
-			{
-				mArmR[0]->draw();
-			}
-			gl::popModelMatrix();
-			gl::pushModelMatrix();
-			{
-				gl::translate(0, 1.333, 0);
-				//Helpers::rotateFromBase(float(-M_PI / 6), vec3(1, 0, 0), vec3(0.666, 0, 0));
-				mArmR[1]->draw();
-				gl::pushModelMatrix();
-				{
-					gl::translate(0, 1, 0);
-					rHand.draw();
-				}
-				gl::popModelMatrix();
-			}
-			gl::popModelMatrix();
-		}
-		gl::popModelMatrix();
-
-		gl::pushModelMatrix();
-		{
-			gl::translate(1, 0, 0);
-			Helpers::rotateFromBase(float(-M_PI / 2), vec3(0, 0, 1), vec3(-0.666, 0, 0));
-			gl::pushModelMatrix();
-			{
-				mArmL[0]->draw();
-			}
-			gl::popModelMatrix();
-			gl::pushModelMatrix();
-			{
-				gl::translate(0, 1.333, 0);
-				Helpers::rotateFromBase(float(M_PI / 6), vec3(1, 1, 0), vec3(-1, 0, 0));
-				mArmL[1]->draw();
-				gl::pushModelMatrix();
-				{
-					gl::translate(0, 1, 0);
-					lHand.draw();
-				}
-				gl::popModelMatrix();
-			}
-			gl::popModelMatrix();
-		}
-		gl::popModelMatrix();
 
 	}
 	gl::popModelMatrix();

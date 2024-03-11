@@ -66,7 +66,7 @@ void Hand::draw() {
 			gl::scale(-0.5, 0.5, 0.5);  // Mirroring about the y-axis
 		}
 		else {
-			gl::scale(0.5, 0.5, 0.5);  // scale
+			gl::scale(0.5, 0.5, 0.5); 
 		}
 		glm::mat4 shearMatrix;
 		gl::pushModelMatrix();
