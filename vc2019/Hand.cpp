@@ -53,7 +53,7 @@ void Hand::draw() {
 	{
 		//Palm
 
-		gl::scale(1, -1, 1);  // Mirroring about the y-axis
+		//gl::scale(1, -1, 1);
 		if (rightHand) {
 			gl::color(0.1, 0, 0.5);
 		}
@@ -107,6 +107,9 @@ void Hand::draw() {
 		//Thumb
 		gl::pushModelMatrix();
 		{
+			if (rightHand) {
+				gl::scale(-1, 1, 1);  // Mirroring about the y-axis
+			}
 			gl::pushModelMatrix(); // Base of thumb
 			{
 				gl::translate(thumbBaseTranslate);
