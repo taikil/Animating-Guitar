@@ -54,19 +54,34 @@ void GuitarApp::mouseDown(MouseEvent event)
 
 void GuitarApp::mouseDrag(MouseEvent event) {
 	// Calculate the mouse movement delta
-	vec2 mouseDelta = vec2(event.getPos()) - mInitialMousePos;
+	if (event.isRightDown()) {
+		vec2 mouseDelta = vec2(event.getPos()) - mInitialMousePos;
 
-	// Create a quaternion representing the rotation based on mouse movement
-	quat rotationQuat = quat(vec3(-mouseDelta.y, -mouseDelta.x, 0) * 0.01f);
+		// Create a quaternion representing the rotation based on mouse movement
+		quat rotationQuat = quat(vec3(-mouseDelta.y, -mouseDelta.x, 0) * 0.01f);
 
-	// Apply the rotation to the camera's orientation
-	mRotationQuat = rotationQuat * mRotationQuat;
+		// Apply the rotation to the camera's orientation
+		mRotationQuat = rotationQuat * mRotationQuat;
 
-	// Adjust the camera's position to rotate around the point of interest
-	vec3 eye = mRotationQuat * eyePos; // Eye position relative to target
-	vec3 target = vec3(0); // Your point of interest
-	mCam.lookAt(eye + target, target); // Update camera's lookAt and eye positions
-	mInitialMousePos = event.getPos();
+		// Adjust the camera's position to rotate around the point of interest
+		vec3 eye = mRotationQuat * eyePos; // Eye position relative to target
+		vec3 target = vec3(0); // Your point of interest
+		mCam.lookAt(eye + target, target); // Update camera's lookAt and eye positions
+		mInitialMousePos = event.getPos();
+	}
+	else {
+		vec2 mouseDelta = vec2(event.getPos()) - mInitialMousePos;
+
+		// Adjust the camera's position based on the mouse movement for zooming
+		float zoomSpeed = 0.1f;
+		eyePos.z += mouseDelta.y * zoomSpeed;
+
+		// Ensure that the camera does not go too close or too far
+		eyePos.z = math<float>::clamp(eyePos.z, -20.0f, -1.0f);
+
+		// Update the camera's lookAt and eye positions
+		mCam.lookAt(eyePos, vec3(0));
+	}
 }
 
 void GuitarApp::update()

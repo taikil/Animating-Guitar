@@ -121,7 +121,7 @@ void Player::draw() {
 			gl::pushModelMatrix();
 			{
 				gl::translate(0, 1.333, 0);
-				Helpers::rotateFromBase(float(M_PI / 6), vec3(1, 1, 0), vec3(0.666, 0, 0));
+				Helpers::rotateFromBase(float(M_PI / 6), vec3(1, 1, 0), vec3(-1, 0, 0));
 				mArmL[1]->draw();
 				gl::pushModelMatrix();
 				{
