@@ -3,6 +3,7 @@
 
 Player::Player() {
 	setup();
+	guitar = GuitarModel();
 }
 
 void Player::setup() {
@@ -142,11 +143,14 @@ void Player::draw() {
 	gl::pushModelMatrix();
 	{
 		//drawHands();
-		drawBody();
-		drawHead();
-		drawArms();
+		//drawBody();
+		//drawHead();
+		//drawArms();
 
-
+		gl::pushModelMatrix();
+		gl::translate(0, 0, 0);
+		guitar.draw();
+		gl::popModelMatrix();
 	}
 	gl::popModelMatrix();
 }

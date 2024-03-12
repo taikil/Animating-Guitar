@@ -5,6 +5,7 @@
 #include "cinder/gl/gl.h"
 #include "Helpers.h"
 #include "Hand.h"
+#include "GuitarModel.h"
 
 
 using namespace ci;
@@ -33,6 +34,7 @@ public:
 	//gl::BatchRef mThumb[3];
 
 private:
+	GuitarModel guitar;
 	Hand lHand = Hand(false);
 	Hand rHand = Hand(true);
 	float armLen = 1.0;

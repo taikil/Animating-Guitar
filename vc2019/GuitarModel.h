@@ -12,6 +12,7 @@ using namespace ci;
 
 class GuitarModel {
 public:
+    GuitarModel();
     void setup();
     void draw();
 
