@@ -17,6 +17,8 @@ public:
     void draw();
 
 private:
-    ci::gl::BatchRef mModelBatch;
+    gl::BatchRef mModelBatch;
+
+	gl::BatchRef fret;
 };
 
