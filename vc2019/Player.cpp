@@ -15,6 +15,8 @@ void Player::setup() {
 	auto sphere = geom::Sphere().subdivisions(40);
 	mHead = gl::Batch::create(sphere, shader);
 	//auto rotation = geom::Rotate(0, 0, 90);
+	auto dot = geom::Sphere().subdivisions(40).radius(0.01);
+	sampleDot = gl::Batch::create(dot, shader);
 	auto upperArm = geom::Capsule().subdivisionsAxis(10)
 		.subdivisionsHeight(10).length(1.0).radius(0.25);
 	auto forearm = geom::Capsule().subdivisionsAxis(10)
@@ -142,14 +144,35 @@ void Player::drawArms() {
 void Player::draw() {
 	gl::pushModelMatrix();
 	{
-		//drawHands();
-		//drawBody();
-		//drawHead();
-		//drawArms();
+		drawBody();
+		drawHead();
+		drawArms();
 
 		gl::pushModelMatrix();
-		gl::translate(0, 0, 0);
+		gl::translate(0, 0, 1);
 		guitar.draw();
+		gl::popModelMatrix();
+
+		//Dots to get fretting positions
+		gl::pushModelMatrix();
+		{
+			gl::translate(-0.06, 2.05, 1.3);
+			float stringDistance = 0.04;
+			float fretDistance = -0.1;
+			for (int i = 0; i < 24; i++) {
+				for (int j = 0; j < 6; j++) {
+					gl::pushModelMatrix();
+					sampleDot->draw();
+					gl::translate(stringDistance, 0, 0);
+				}
+				popN(6);
+				gl::pushModelMatrix();
+				stringDistance *= 1.024;
+				fretDistance += 0.0002;
+				gl::translate(-0.0025, fretDistance, 0);
+			}
+			popN(24);
+		}
 		gl::popModelMatrix();
 	}
 	gl::popModelMatrix();

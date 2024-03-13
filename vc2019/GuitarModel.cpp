@@ -17,8 +17,10 @@ void GuitarModel::setup() {
 	mModelBatch = gl::Batch::create(*model, shader);
 	//Frets
 	auto capsule = geom::Capsule().subdivisionsAxis(10)
-		.subdivisionsHeight(10).radius(0.1);
-	fret = gl::Batch::create(capsule, shader);
+		.subdivisionsHeight(10).radius(0.1).length(2.1);
+	auto scale = geom::Scale(0.1, 0.1, 0.1);
+	auto rot = geom::Rotate(quat(vec3(0, 0, float(M_PI / 2))));
+	fret = gl::Batch::create(capsule >> rot >> scale, shader);
 }
 
 void GuitarModel::draw() {
@@ -27,19 +29,35 @@ void GuitarModel::draw() {
 	{
 		gl::pushModelMatrix();
 		{
-			gl::scale(3, 3, 3);
+			gl::scale(6, 6, 6);
 			gl::translate(0, -0.5, 0);
 			mModelBatch->draw();
 		}
 		gl::popModelMatrix();
 		gl::pushModelMatrix();
 		{
-			gl::translate(0.02, 1, 0.13);
-			gl::rotate(angleAxis(float(M_PI / 2), vec3(0, 0, 1)));
-			gl::scale(0.1, 0.1, 0.1);
+			gl::color(0.886, 0.922, 0.914);
+			gl::translate(0.04, 2.0, 0.27);
 			fret->draw();
+			float zTrans = 0; // depth of fretboard gets closer
+			float spacing = -0.1; // Distance between frets
+			for (int i = 0; i < 23; i++) {
+				gl::pushModelMatrix();
+				gl::translate(0, spacing, zTrans);
+				gl::scale(1.024, 1, 1);
+				fret->draw();
+				zTrans += 0.00001;
+				spacing += 0.0002;
+			}
+			popN(23);
 		}
 		gl::popModelMatrix();
 	}
 	gl::popModelMatrix();
+}
+
+void GuitarModel::popN(int n) {
+	for (int i = 0; i < n; i++) {
+		gl::popModelMatrix();
+	}
 }

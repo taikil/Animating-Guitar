@@ -15,6 +15,7 @@ public:
     GuitarModel();
     void setup();
     void draw();
+    void popN(int n);
 
 private:
     gl::BatchRef mModelBatch;
