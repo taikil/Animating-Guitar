@@ -95,8 +95,9 @@ void Player::drawArms() {
 		gl::pushModelMatrix();
 		{
 			gl::translate(0, 1.333, 0);
-			Helpers::rotateFromBase(float(M_PI / 6), vec3(1, 0, 0), vec3(0, 0.666, 0));
-			Helpers::rotateFromBase(float(M_PI / 12), vec3(0, 1, 0), vec3(0, 0, 0));
+			Helpers::rotateFromBase(float(forarmRRot.x), vec3(1, 0, 0), vec3(0, 0.666, 0));
+			gl::rotate(angleAxis(float(forarmRRot.y), vec3(0, 1, 0)));
+			Helpers::rotateFromBase(float(forarmRRot.z), vec3(0, 0, 1), vec3(0, 0.666, 0));
 			mArmR[1]->draw();
 			gl::pushModelMatrix();
 			{
@@ -125,9 +126,9 @@ void Player::drawArms() {
 		gl::pushModelMatrix();
 		{
 			gl::translate(0, 1.333, 0);
-			Helpers::rotateFromBase(float(upperArmLRot.x), vec3(1, 0, 0), vec3(0, 0.666, 0));
-			gl::rotate(angleAxis(float(upperArmLRot.y), vec3(0, 1, 0)));
-			Helpers::rotateFromBase(float(upperArmLRot.z), vec3(0, 0, 1), vec3(0, 0.666, 0));
+			Helpers::rotateFromBase(float(forarmLRot.x), vec3(1, 0, 0), vec3(0, 0.666, 0));
+			gl::rotate(angleAxis(float(forarmLRot.y), vec3(0, 1, 0)));
+			Helpers::rotateFromBase(float(forarmLRot.z), vec3(0, 0, 1), vec3(0, 0.666, 0));
 			mArmL[1]->draw();
 			gl::pushModelMatrix();
 			{
@@ -142,6 +143,8 @@ void Player::drawArms() {
 }
 
 void Player::draw() {
+	//CI_LOG_V("MyApp draw() function");
+
 	gl::pushModelMatrix();
 	{
 		drawBody();
@@ -156,19 +159,21 @@ void Player::draw() {
 		//Dots to get fretting positions
 		gl::pushModelMatrix();
 		{
-			gl::translate(-0.06, 2.05, 1.3);
+			gl::translate(-0.06, 2.05, 1.27);
 			float stringDistance = 0.04;
 			float fretDistance = -0.1;
+			float depthZ = 0;
 			for (int i = 0; i < 24; i++) {
 				for (int j = 0; j < 6; j++) {
 					gl::pushModelMatrix();
 					sampleDot->draw();
-					gl::translate(stringDistance, 0, 0);
+					gl::translate(stringDistance, 0, depthZ);
 				}
 				popN(6);
 				gl::pushModelMatrix();
 				stringDistance *= 1.024;
 				fretDistance += 0.0002;
+				depthZ += 0.00001;
 				gl::translate(-0.0025, fretDistance, 0);
 			}
 			popN(24);

@@ -6,6 +6,7 @@
 #include "Helpers.h"
 #include "Hand.h"
 #include "GuitarModel.h"
+#include "cinder/Log.h"
 
 
 using namespace ci;
@@ -37,6 +38,7 @@ public:
 
 private:
 	GuitarModel guitar;
+	vec3 stringPosition[24][6];
 	Hand lHand = Hand(false);
 	Hand rHand = Hand(true);
 	float armLen = 1.0;
@@ -44,9 +46,9 @@ private:
 	vec3 fingerPos = vec3(0, 0, 0);
 	// x y z rotation
 	vec3 upperArmLRot = vec3(M_PI / 3, 0, 0);
-	vec3 forarmLRot = vec3(M_PI / 2, M_PI / 12, M_PI / 6);
+	vec3 forarmLRot = vec3(M_PI / 4, M_PI / 12, M_PI / 6);
 	vec3 upperArmRRot = vec3(M_PI / 12, 0, 0);
-	vec3 forarmRRot = vec3(M_PI / 6, M_PI / 12, M_PI / 6);
+	vec3 forarmRRot = vec3(0, 0, 0);
 	//Finger names: Index: i, Middle: m, Ring: r, Pinky: p, Thumb: t
 	vec4 fingerLen = vec4(0.9, 1.0, 0.95, 0.7);
 	vec3 knuckleLen = vec3(0.4, 0.4, 0.2);
