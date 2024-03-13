@@ -161,9 +161,9 @@ void Player::draw() {
 		{
 			gl::translate(-0.06, 2.05, 1.27);
 			float stringDistance = 0.04;
-			float fretDistance = -0.1;
+			float fretDistance = -0.12;
 			float depthZ = 0;
-			for (int i = 0; i < 24; i++) {
+			for (int i = 0; i < 21; i++) {
 				for (int j = 0; j < 6; j++) {
 					gl::pushModelMatrix();
 					sampleDot->draw();
@@ -176,7 +176,7 @@ void Player::draw() {
 				depthZ += 0.00001;
 				gl::translate(-0.0025, fretDistance, 0);
 			}
-			popN(24);
+			popN(21);
 		}
 		gl::popModelMatrix();
 	}

@@ -40,8 +40,8 @@ void GuitarModel::draw() {
 			gl::translate(0.04, 2.0, 0.27);
 			fret->draw();
 			float zTrans = 0; // depth of fretboard gets closer
-			float spacing = -0.1; // Distance between frets
-			for (int i = 0; i < 23; i++) {
+			float spacing = -0.12; // Distance between frets
+			for (int i = 0; i < 20; i++) {
 				gl::pushModelMatrix();
 				gl::translate(0, spacing, zTrans);
 				gl::scale(1.024, 1, 1);
@@ -49,7 +49,7 @@ void GuitarModel::draw() {
 				zTrans += 0.00001;
 				spacing += 0.0002;
 			}
-			popN(23);
+			popN(20);
 		}
 		gl::popModelMatrix();
 	}

@@ -38,7 +38,7 @@ public:
 
 private:
 	GuitarModel guitar;
-	vec3 stringPosition[24][6];
+	vec3 stringPosition[21][6];
 	Hand lHand = Hand(false);
 	Hand rHand = Hand(true);
 	float armLen = 1.0;
