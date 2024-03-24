@@ -98,12 +98,15 @@ void Hand::draw() {
 						gl::pushModelMatrix(); // 3x
 						{
 							if (j != 0) {
-								float translation = ((knuckleLen[j] * fingerLen[i]) + (knuckleLen[j - 1] * fingerLen[i - 1])) * 0.666;
-								//gl::translate(0, knuckleLen[j] * fingerLen[i] * 1.333, 0);
-								gl::translate(0, translation, 0);
+								//double translation = (knuckleLen[j] * fingerLen[i] * 0.666) + (knuckleLen[j - 1] * fingerLen[i - 1] * 0.666);
+								gl::translate(0, knuckleLen[j] * fingerLen[i] * 0.666, 0);
+								//gl::translate(0, translation, 0);
 							}
 							Helpers::rotateFromBase(fingerFlexion[i][j], vec3(1, 0, 0), vec3(0, 0.666 * (knuckleLen[j] * fingerLen[i]), 0));
 							mFingers[i][j]->draw();
+							if (j != 2) {
+								gl::translate(0, knuckleLen[j] * fingerLen[i] * 0.666, 0);
+							}
 						}
 					}
 				}
