@@ -142,24 +142,69 @@ void Player::drawArms() {
 	gl::popModelMatrix();
 }
 
+std::vector<glm::vec3>fabrik(std::vector<glm::vec3>& joint_positions, const glm::vec3& target_position, const std::vector<float>& distances, float tolerance = 0.01f) {
+	int n = joint_positions.size();
+	float dist = glm::length(joint_positions[0] - target_position);
+
+	if (dist > std::accumulate(distances.begin(), distances.end(), 0.0f) + tolerance) {
+		for (int i = 0; i < n - 1; i++) {
+			float ri = glm::length(target_position - joint_positions[i]);
+			float lambdai = distances[i] / ri;
+			joint_positions[i + 1] = (1.0f - lambdai) * joint_positions[i] + lambdai * target_position;
+		}
+	}
+	else {
+		glm::vec3 b = joint_positions[0];
+		float difA = glm::length(joint_positions.back() - target_position);
+		while (difA > tolerance) {
+			// Stage 1: Forward Reaching
+			joint_positions.back() = target_position;
+			for (int i = n - 1; i > 0; i--) {
+				float ri = glm::length(joint_positions[i + 1] - joint_positions[i]);
+				float lambdai = distances[i] / ri;
+				joint_positions[i] = (1.0f - lambdai) * joint_positions[i + 1] + lambdai * joint_positions[i];
+			}
+
+			// Stage 2: Backward Reaching
+			joint_positions[0] = b;
+			for (int i = 0; i < n - 1; i++) {
+				float ri = glm::length(joint_positions[i + 1] - joint_positions[i]);
+				float lambdai = distances[i] / ri;
+				joint_positions[i + 1] = (1.0f - lambdai) * joint_positions[i] + lambdai * joint_positions[i + 1];
+			}
+
+			difA = glm::length(joint_positions.back() - target_position);
+		}
+	}
+
+	return joint_positions;
+}
+
 void Player::draw() {
 	//CI_LOG_V("MyApp draw() function");
 
 	gl::pushModelMatrix();
 	{
-		drawBody();
-		drawHead();
-		drawArms();
-
+		//Rotata guitar, keep in world co-ords
+		gl::rotate(angleAxis(float(-M_PI / 4), vec3(0, 0, 1)));
 		gl::pushModelMatrix();
-		gl::translate(0, 0, 1);
+		{
+
+			gl::rotate(angleAxis(float(M_PI / 4), vec3(0, 0, 1)));
+			drawBody();
+			drawHead();
+			drawArms();
+		}
+		gl::popModelMatrix();
+		gl::pushModelMatrix();
+		gl::translate(0, 1, 1);
 		guitar.draw();
 		gl::popModelMatrix();
 
 		//Dots to get fretting positions
 		gl::pushModelMatrix();
 		{
-			gl::translate(-0.06, 2.05, 1.27);
+			gl::translate(-0.06, 3.05, 1.27);
 			float stringDistance = 0.04;
 			float fretDistance = -0.12;
 			float depthZ = 0;

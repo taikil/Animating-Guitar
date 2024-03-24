@@ -33,7 +33,7 @@ private:
 	float thumbLen = 0.7;
 	// Defaulted to left hand
 	vec3 thumbBaseTranslate = vec3(-0.4, 0, 0);
-	float thumbBaseRotation = (M_PI / 3);
+	float thumbBaseRotation = (M_PI / 2);
 	vec3 thumbJointTranslate = vec3(-0.4, 0.2, 0);
 	float thumbJointRotation = (M_PI / 2); //3
 	vec3 thumbTipTranslate = vec3(0, 0.4, 0);

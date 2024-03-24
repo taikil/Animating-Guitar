@@ -7,7 +7,8 @@
 #include "Hand.h"
 #include "GuitarModel.h"
 #include "cinder/Log.h"
-
+#include <vector>
+#include <numeric>
 
 using namespace ci;
 
@@ -23,7 +24,7 @@ public:
 	void drawHead();
 	void drawArms();
 	void drawHands(bool right);
-	void circumduction(float angle, bool right);
+	//std::vector<glm::vec3> fabrik(std::vector<glm::vec3>& joint_positions, const glm::vec3& target_position, const std::vector<float>& distances, float lambda = 0.01f);
 
 
 	gl::BatchRef	sampleDot;
@@ -45,10 +46,10 @@ private:
 	vec3 handPos = vec3(0, 0, 0);
 	vec3 fingerPos = vec3(0, 0, 0);
 	// x y z rotation
-	vec3 upperArmLRot = vec3(M_PI / 3, 0, 0);
-	vec3 forarmLRot = vec3(M_PI / 4, M_PI / 12, M_PI / 6);
-	vec3 upperArmRRot = vec3(M_PI / 12, 0, 0);
-	vec3 forarmRRot = vec3(0, 0, 0);
+	vec3 upperArmLRot = vec3(M_PI / 4, 0, -M_PI / 6);
+	vec3 forarmLRot = vec3(M_PI / 2, M_PI / 12, M_PI / 6);
+	vec3 upperArmRRot = vec3(M_PI / 6, 0, M_PI / 6);
+	vec3 forarmRRot = vec3(M_PI / 2, 0, 0);
 	//Finger names: Index: i, Middle: m, Ring: r, Pinky: p, Thumb: t
 	vec4 fingerLen = vec4(0.9, 1.0, 0.95, 0.7);
 	vec3 knuckleLen = vec3(0.4, 0.4, 0.2);

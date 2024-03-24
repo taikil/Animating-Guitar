@@ -16,7 +16,7 @@ void Hand::setup() {
 
 	//4 fingers
 	for (int i = 0; i < 4; i++) {
-		float rel = i / float(4.0);
+		float rel = (i / float(4.0));
 		for (int j = 0; j < 3; j++) {
 			auto knuckle = geom::Capsule().subdivisionsAxis(10)
 				.subdivisionsHeight(10).length(fingerLen[i] * knuckleLen[j]).radius(0.1f);
@@ -66,7 +66,7 @@ void Hand::draw() {
 			gl::scale(-0.5, 0.5, 0.5);  // Mirroring about the y-axis
 		}
 		else {
-			gl::scale(0.5, 0.5, 0.5); 
+			gl::scale(0.5, 0.5, 0.5);
 		}
 		glm::mat4 shearMatrix;
 		gl::pushModelMatrix();
@@ -97,9 +97,13 @@ void Hand::draw() {
 					for (int j = 0; j < 3; j++) {
 						gl::pushModelMatrix(); // 3x
 						{
-							Helpers::rotateFromBase(fingerFlexion[i][j], vec3(1, 0, 0), vec3(0, 0.5 * (knuckleLen[j] * fingerLen[i] - 0.1), 0));
+							if (j != 0) {
+								float translation = ((knuckleLen[j] * fingerLen[i]) + (knuckleLen[j - 1] * fingerLen[i - 1])) * 0.666;
+								//gl::translate(0, knuckleLen[j] * fingerLen[i] * 1.333, 0);
+								gl::translate(0, translation, 0);
+							}
+							Helpers::rotateFromBase(fingerFlexion[i][j], vec3(1, 0, 0), vec3(0, 0.666 * (knuckleLen[j] * fingerLen[i]), 0));
 							mFingers[i][j]->draw();
-							gl::translate(0, knuckleLen[j] * fingerLen[i], 0);
 						}
 					}
 				}
