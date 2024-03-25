@@ -12,6 +12,7 @@ using namespace ci;
 class Hand
 {
 public:
+	Hand();
 	Hand(bool rightHand, std::vector<float> angles);
 	void setup();
 	void update();

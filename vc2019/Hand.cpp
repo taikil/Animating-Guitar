@@ -1,5 +1,11 @@
 #include "Hand.h"
 
+Hand::Hand() {
+	this->rightHand = false;
+	std::vector<float> angles(12, 0.0f);
+	setAngles(angles);
+	setup();
+}
 
 Hand::Hand(bool rightHand, std::vector<float> angles) {
 	this->rightHand = rightHand;
@@ -45,9 +51,11 @@ void Hand::update() {
 
 void Hand::setAngles(std::vector<float> angles) {
 	int k = 0;
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 3; j++) {
-			fingerFlexion[i][j] = angles[k++];
+	if (angles.size() == 12) {
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 3; j++) {
+				fingerFlexion[i][j] = angles[k++];
+			}
 		}
 	}
 }
