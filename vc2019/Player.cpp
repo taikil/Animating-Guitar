@@ -142,7 +142,7 @@ void Player::drawArms() {
 	gl::popModelMatrix();
 }
 
-std::vector<glm::vec3>fabrik(std::vector<glm::vec3>& joint_positions, const glm::vec3& target_position, const std::vector<float>& distances, float tolerance = 0.01f) {
+std::vector<glm::vec3> Player::fabrik(std::vector<glm::vec3>& joint_positions, const glm::vec3& target_position, const std::vector<float>& distances, float tolerance) {
 	int n = joint_positions.size();
 	float dist = glm::length(joint_positions[0] - target_position);
 
@@ -176,7 +176,6 @@ std::vector<glm::vec3>fabrik(std::vector<glm::vec3>& joint_positions, const glm:
 			difA = glm::length(joint_positions.back() - target_position);
 		}
 	}
-
 	return joint_positions;
 }
 
@@ -185,7 +184,7 @@ void Player::draw() {
 
 	gl::pushModelMatrix();
 	{
-		//Rotata guitar, keep in world co-ords
+		//Rotate guitar, keep in world co-ords
 		gl::rotate(angleAxis(float(-M_PI / 4), vec3(0, 0, 1)));
 		gl::pushModelMatrix();
 		{

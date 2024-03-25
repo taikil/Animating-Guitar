@@ -1,8 +1,9 @@
 #include "Hand.h"
 
 
-Hand::Hand(bool rightHand) {
+Hand::Hand(bool rightHand, std::vector<float> angles) {
 	this->rightHand = rightHand;
+	setAngles(angles);
 	setup();
 }
 
@@ -32,12 +33,6 @@ void Hand::setup() {
 		mThumb[i] = gl::Batch::create(thumb, shader);
 	}
 
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 3; j++) {
-			fingerFlexion[i][j] = float(M_PI / 3) * knuckleLen[j];
-		}
-	}
-
 	//Switch for right hand
 	(rightHand) ? thumbBaseTranslate.x = -thumbBaseTranslate.x : void();
 	(rightHand) ? thumbBaseRotation = -thumbBaseRotation : void();
@@ -46,6 +41,15 @@ void Hand::setup() {
 }
 
 void Hand::update() {
+}
+
+void Hand::setAngles(std::vector<float> angles) {
+	int k = 0;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 3; j++) {
+			fingerFlexion[i][j] = angles[k++];
+		}
+	}
 }
 
 void Hand::draw() {

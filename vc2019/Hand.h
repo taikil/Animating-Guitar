@@ -4,6 +4,7 @@
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
 #include "Helpers.h"
+#include <vector>
 
 
 using namespace ci;
@@ -11,12 +12,13 @@ using namespace ci;
 class Hand
 {
 public:
-	Hand(bool rightHand);
+	Hand(bool rightHand, std::vector<float> angles);
 	void setup();
 	void update();
 	void draw();
 	void popN(int n);
 
+	void setAngles(std::vector<float> angles);
 
 	gl::BatchRef mRect;
 	gl::BatchRef mFingers[4][3];
@@ -38,6 +40,8 @@ private:
 	float thumbJointRotation = (M_PI / 2); //3
 	vec3 thumbTipTranslate = vec3(0, 0.4, 0);
 	float thumbTipRotation = (M_PI / 3); //6
+
+
 
 	vec3 fingerTranslate[4];
 	float fingerFlexion[4][3];
