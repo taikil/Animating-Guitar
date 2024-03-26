@@ -16,6 +16,20 @@ struct Joint {
 	vec3 position; // Position of the joint
 	float length; // Length of the segment connecting it to the parent joint
 	vec3 angles; // Angles of rotation around each axis x, y, z
+	Joint* next;
+	Joint* prev;
+
+	Joint() : position(vec3(0.0f)), length(0.0f), angles(vec3(0.0f)), next(nullptr), prev(nullptr) {}
+	Joint(const ::vec3& pos, float len, const vec3& ang)
+		: position(pos), length(len), angles(ang), next(nullptr), prev(nullptr) {}
+
+	void setPosition(const glm::vec3& newPosition) {
+		position = newPosition;
+	}
+
+	void setAngle(const glm::vec3& newAngle) {
+		angles = newAngle;
+	}
 };
 
 class Player
@@ -32,8 +46,8 @@ public:
 	void drawHands(bool right);
 	void defineJoints();
 
-	std::vector<glm::vec3> getJointPositions(std::vector<glm::vec3> joint_positions);
-	std::vector<glm::vec3> fabrik(std::vector<glm::vec3>& joint_positions, const glm::vec3& target_position, const std::vector<float>& distances, float tolerance = 0.01f);
+	void getJointPositions(Joint* curJoint, vec3 curAngle, std::vector<vec3>* positions);
+	std::vector<vec3> fabrik(std::vector<vec3>& joint_positions, const vec3& target_position, const std::vector<float>& distances, float tolerance = 0.01f);
 
 	gl::BatchRef	sampleDot;
 

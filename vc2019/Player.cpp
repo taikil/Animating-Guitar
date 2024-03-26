@@ -39,35 +39,36 @@ void Player::update() {
 }
 
 void Player::defineJoints() {
-	lHandJoints.reserve(fingerLengths.size()); 
-	rHandJoints.reserve(fingerLengths.size()); 
+	lHandJoints.reserve(fingerLengths.size());
+	rHandJoints.reserve(fingerLengths.size());
 	lArmJoints.reserve(3);
 	rArmJoints.reserve(3);
 
 	vec3 position(0.0f); // Starting position
 	vec3 angles(0.0f);   // Starting angles
 
+	//Bicep, forearm and palm/wrist
 	for (int i = 0; i < 3; i++) {
 		Joint joint;
 		joint.position = i == 0 ? vec3(1.1, 0, 0) : position;
 		joint.length = i == 2 ? 0.8 : 1.3;
 		joint.angles = angles;
 
+
 		lHandJoints.push_back(joint);
 		joint.position = -joint.position;
 		rHandJoints.push_back(joint);
 	}
 
-	for (size_t i = 0; i < lHandJoints.size(); ++i) {
-		// Compute joint position based on parent joint position, length, and angles
-		Joint& parent = lHandJoints[i];
-		Joint& child = lHandJoints[i];
+	for (int i = 0; i < lHandJoints.size() - 1; i++) {
+		lHandJoints[i].next = &lHandJoints[i + 1];
+		lHandJoints[i + 1].prev = &lHandJoints[i];
 
-		// Calculate position using trigonometric functions
-		child.position.x = parent.position.x + child.length * std::cos(child.angles[0]); // X-coordinate
-		child.position.y = parent.position.y + child.length * std::sin(child.angles[1]); // Y-coordinate
-		child.position.z = parent.position.z + child.length * std::tan(child.angles[2]); // Z-coordinate
+		rHandJoints[i].next = &rHandJoints[i + 1];
+		rHandJoints[i + 1].prev = &rHandJoints[i];
 	}
+
+	//Fingers
 
 	for (float length : fingerLengths) {
 		// Create a new joint
@@ -85,6 +86,21 @@ void Player::defineJoints() {
 	}
 
 
+}
+
+void Player::getJointPositions(Joint* curJoint, vec3 totalAngle, std::vector<vec3>* positions) {
+	Joint* parent = curJoint->prev;
+	vec3 curAngle = curJoint->angles + totalAngle;
+
+	// Calculate position using trigonometric functions
+	float curPositionX = parent->position.x + curJoint->length * std::cos(curAngle[0]); // X-coordinate
+	float curPositionY = parent->position.y + curJoint->length * std::sin(curAngle[1]); // Y-coordinate
+	float curPositionZ = parent->position.z + curJoint->length * std::tan(curAngle[2]); // Z-coordinate
+
+
+	if (curJoint->next != nullptr) {
+		getJointPositions(curJoint->next, curAngle, positions);
+	}
 }
 
 void Player::drawBody() {
