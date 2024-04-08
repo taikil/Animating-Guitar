@@ -54,9 +54,7 @@ public:
 	gl::BatchRef	sampleDot;
 	gl::BatchRef	mBody;
 	gl::BatchRef	mHead;
-	gl::BatchRef	mArmR[2];
-	gl::BatchRef	mArmL[2];
-	gl::BatchRef	mLegs[4];
+	gl::BatchRef	mArm;
 
 private:
 	GuitarModel guitar;
@@ -66,7 +64,9 @@ private:
 	Hand rHand;
 	// x y z rotation
 	// [ RShoulder, RForearm, RWrist, LShoulder, LForearm, LWrist ]
+	std::vector<vec3> armTranslations;
 	std::vector<vec3> armRotations;
+	float armRootRotation = M_PI / 2;
 	//Finger names: Index: i, Middle: m, Ring: r, Pinky: p, Thumb: t
 	std::vector<float> fingerLengths = { 0.416f, 0.416f, 0.208f, 0.52f, 0.52f, 0.26f, 0.468f, 0.468f, 0.234f, 0.338f, 0.338f, 0.169f }; // Each finger segment lens * 1.3 (capsule len)
 	std::vector<float> fingerAngles = { M_PI / 12, M_PI / 12, M_PI / 12, M_PI / 12, M_PI / 12, M_PI / 12, M_PI / 12, M_PI / 12, M_PI / 12, M_PI / 12, M_PI / 12, M_PI / 12 };

@@ -31,6 +31,7 @@ private:
 	vec2 mInitialMousePos;
 	quat mRotationQuat;
 	vec3 eyePos = vec3(0, 0, -5);
+	vec3 currentTarget;
 };
 
 void GuitarApp::setup()
@@ -44,7 +45,7 @@ void GuitarApp::setup()
 	gl::GlslProgRef	shader = gl::getStockShader(lambert);
 
 	player.setup();
-
+	currentTarget = player.getCurrentNotePos();
 }
 
 void GuitarApp::mouseDown(MouseEvent event)
@@ -86,6 +87,9 @@ void GuitarApp::mouseDrag(MouseEvent event) {
 
 void GuitarApp::update()
 {
+
+
+
 }
 
 void GuitarApp::draw()

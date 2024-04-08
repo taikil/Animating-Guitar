@@ -20,27 +20,27 @@ void Player::setup() {
 	auto dot = geom::Sphere().subdivisions(40).radius(0.01);
 	sampleDot = gl::Batch::create(dot, shader);
 
-	auto upperArm = geom::Capsule().subdivisionsAxis(10)
-		.subdivisionsHeight(10).length(1.0).radius(0.25);
 
 	auto forearm = geom::Capsule().subdivisionsAxis(10)
 		.subdivisionsHeight(10).length(1.0).radius(0.25);
 
-	mArmL[0] = gl::Batch::create(upperArm, shader);
-	mArmL[1] = gl::Batch::create(forearm, shader);
-	mArmR[0] = gl::Batch::create(upperArm, shader);
-	mArmR[1] = gl::Batch::create(forearm, shader);
+	mArm = gl::Batch::create(forearm, shader);
 
 	lHand = Hand(false, fingerAngles);
 	rHand = Hand(true, fingerAngles);
 	armRotations.resize(6, glm::vec3(M_PI / 6, 0, 0));
+	armTranslations.resize(7);
+	armTranslations = { vec3(-1.1, 0, 0), vec3(0, 1.333, 0),
+						vec3(0, 0.9, 0), vec3(1.1, 0, 0),
+						vec3(0, 1.333 ,0), vec3(0, 0.9, 0) };
 }
 
 void Player::update() {
 }
 
 vec3 Player::getCurrentNotePos() {
-	return notes.front();
+	return fretPositions[0][0];
+	//return notes.front();
 }
 
 void Player::defineJoints() {
@@ -160,26 +160,26 @@ void Player::drawArms() {
 	//Right Arm
 	gl::pushModelMatrix();
 	{
-		gl::translate(-1.1, 0, 0);
-		Helpers::rotateFromBase(float(M_PI / 2), vec3(0, 0, 1), vec3(0.666, 0, 0)); // T - pose
+		gl::translate(armTranslations[0]);
+		Helpers::rotateFromBase(armRootRotation, vec3(0, 0, 1), vec3(0.666, 0, 0)); // T - pose rotation from root
 		Helpers::rotateFromBase(float(armRotations[0].x), vec3(1, 0, 0), vec3(0, 0.666, 0));
 		gl::rotate(angleAxis(float(armRotations[0].y), vec3(0, 1, 0)));
 		Helpers::rotateFromBase(float(armRotations[0].z), vec3(0, 0, 1), vec3(0, 0.666, 0));
 		gl::pushModelMatrix();
 		{
-			mArmR[0]->draw();
+			mArm->draw();
 		}
 		gl::popModelMatrix();
 		gl::pushModelMatrix();
 		{
-			gl::translate(0, 1.333, 0);
+			gl::translate(armTranslations[1]);
 			Helpers::rotateFromBase(float(armRotations[1].x), vec3(1, 0, 0), vec3(0, 0.666, 0));
 			gl::rotate(angleAxis(float(armRotations[1].y), vec3(0, 1, 0)));
 			Helpers::rotateFromBase(float(armRotations[1].z), vec3(0, 0, 1), vec3(0, 0.666, 0));
-			mArmR[1]->draw();
+			mArm->draw();
 			gl::pushModelMatrix();
 			{
-				gl::translate(0, 0.8, 0);
+				gl::translate(armTranslations[2]);
 				Helpers::rotateFromBase(float(armRotations[2].x), vec3(1, 0, 0), vec3(0, 0.4, 0));
 				gl::rotate(angleAxis(float(armRotations[2].y), vec3(0, 1, 0)));
 				Helpers::rotateFromBase(float(armRotations[2].z), vec3(0, 0, 1), vec3(0, 0.4, 0));
@@ -194,26 +194,26 @@ void Player::drawArms() {
 	//Left Arm
 	gl::pushModelMatrix();
 	{
-		gl::translate(1.1, 0, 0);
-		Helpers::rotateFromBase(float(-M_PI / 2), vec3(0, 0, 1), vec3(-0.666, 0, 0)); // T - pose
+		gl::translate(armTranslations[3]);
+		Helpers::rotateFromBase(-armRootRotation, vec3(0, 0, 1), vec3(-0.666, 0, 0)); // T - pose rotation from Root
 		Helpers::rotateFromBase(float(armRotations[3].x), vec3(1, 0, 0), vec3(0, 0.666, 0));
 		gl::rotate(angleAxis(float(armRotations[3].y), vec3(0, 1, 0)));
 		Helpers::rotateFromBase(float(armRotations[3].z), vec3(0, 0, 1), vec3(0, 0.666, 0));
 		gl::pushModelMatrix();
 		{
-			mArmL[0]->draw();
+			mArm->draw();
 		}
 		gl::popModelMatrix();
 		gl::pushModelMatrix();
 		{
-			gl::translate(0, 1.333, 0);
+			gl::translate(armTranslations[4]);
 			Helpers::rotateFromBase(float(armRotations[4].x), vec3(1, 0, 0), vec3(0, 0.666, 0));
 			gl::rotate(angleAxis(float(armRotations[4].y), vec3(0, 1, 0)));
 			Helpers::rotateFromBase(float(armRotations[4].z), vec3(0, 0, 1), vec3(0, 0.666, 0));
-			mArmL[1]->draw();
+			mArm->draw();
 			gl::pushModelMatrix();
 			{
-				gl::translate(0, 0.9, 0);
+				gl::translate(armTranslations[5]);
 				Helpers::rotateFromBase(float(armRotations[5].x), vec3(1, 0, 0), vec3(0, 0.4, 0));
 				gl::rotate(angleAxis(float(armRotations[5].y), vec3(0, 1, 0)));
 				Helpers::rotateFromBase(float(armRotations[5].z), vec3(0, 0, 1), vec3(0, 0.4, 0));
@@ -357,7 +357,7 @@ void Player::draw() {
 						sampleDot->draw();
 						if (!printedTranslation) {
 							vec3 currentTranslation = gl::getModelMatrix() * vec4(0, 0, 0, 1);
-							CI_LOG_V("String: " << i+1 << ", Translation:" << currentTranslation);
+							CI_LOG_V("String: " << i + 1 << ", Translation:" << currentTranslation);
 						}
 						gl::translate(stringDistance, 0, depthZ);
 					}
