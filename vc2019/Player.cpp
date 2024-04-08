@@ -158,72 +158,37 @@ void Player::drawHead() {
 void Player::drawArms() {
 
 	//Right Arm
-	gl::pushModelMatrix();
-	{
-		gl::translate(armTranslations[0]);
-		Helpers::rotateFromBase(armRootRotation, vec3(0, 0, 1), vec3(0.666, 0, 0)); // T - pose rotation from root
-		Helpers::rotateFromBase(float(armRotations[0].x), vec3(1, 0, 0), vec3(0, 0.666, 0));
-		gl::rotate(angleAxis(float(armRotations[0].y), vec3(0, 1, 0)));
-		Helpers::rotateFromBase(float(armRotations[0].z), vec3(0, 0, 1), vec3(0, 0.666, 0));
+	for (int i = 0; i <= 3; i += 3) {
 		gl::pushModelMatrix();
 		{
-			mArm->draw();
-		}
-		gl::popModelMatrix();
-		gl::pushModelMatrix();
-		{
-			gl::translate(armTranslations[1]);
-			Helpers::rotateFromBase(float(armRotations[1].x), vec3(1, 0, 0), vec3(0, 0.666, 0));
-			gl::rotate(angleAxis(float(armRotations[1].y), vec3(0, 1, 0)));
-			Helpers::rotateFromBase(float(armRotations[1].z), vec3(0, 0, 1), vec3(0, 0.666, 0));
-			mArm->draw();
+			gl::translate(armTranslations[0 + i]);
+			Helpers::rotateFromBase(i == 0 ? armRootRotation : -armRootRotation,
+				vec3(0, 0, 1), vec3(i == 0 ? 0.666 : -0.666, 0, 0)); // T - pose rotation from root
+			allRotations(armRotations[0 + i], vec3(0, 0.666, 0));
+			mArm->draw(); //Shoulder
 			gl::pushModelMatrix();
 			{
-				gl::translate(armTranslations[2]);
-				Helpers::rotateFromBase(float(armRotations[2].x), vec3(1, 0, 0), vec3(0, 0.4, 0));
-				gl::rotate(angleAxis(float(armRotations[2].y), vec3(0, 1, 0)));
-				Helpers::rotateFromBase(float(armRotations[2].z), vec3(0, 0, 1), vec3(0, 0.4, 0));
-				drawHands(true);
+				gl::translate(armTranslations[1 + i]);
+				allRotations(armRotations[1 + i], vec3(0, 0.666, 0));
+				mArm->draw(); // Forearm
+				gl::pushModelMatrix();
+				{
+					gl::translate(armTranslations[2 + i]);
+					allRotations(armRotations[2 + i], vec3(0, 0.4, 0));
+					drawHands(i == 0 ? true : false);
+				}
+				gl::popModelMatrix();
 			}
 			gl::popModelMatrix();
 		}
 		gl::popModelMatrix();
 	}
-	gl::popModelMatrix();
+}
 
-	//Left Arm
-	gl::pushModelMatrix();
-	{
-		gl::translate(armTranslations[3]);
-		Helpers::rotateFromBase(-armRootRotation, vec3(0, 0, 1), vec3(-0.666, 0, 0)); // T - pose rotation from Root
-		Helpers::rotateFromBase(float(armRotations[3].x), vec3(1, 0, 0), vec3(0, 0.666, 0));
-		gl::rotate(angleAxis(float(armRotations[3].y), vec3(0, 1, 0)));
-		Helpers::rotateFromBase(float(armRotations[3].z), vec3(0, 0, 1), vec3(0, 0.666, 0));
-		gl::pushModelMatrix();
-		{
-			mArm->draw();
-		}
-		gl::popModelMatrix();
-		gl::pushModelMatrix();
-		{
-			gl::translate(armTranslations[4]);
-			Helpers::rotateFromBase(float(armRotations[4].x), vec3(1, 0, 0), vec3(0, 0.666, 0));
-			gl::rotate(angleAxis(float(armRotations[4].y), vec3(0, 1, 0)));
-			Helpers::rotateFromBase(float(armRotations[4].z), vec3(0, 0, 1), vec3(0, 0.666, 0));
-			mArm->draw();
-			gl::pushModelMatrix();
-			{
-				gl::translate(armTranslations[5]);
-				Helpers::rotateFromBase(float(armRotations[5].x), vec3(1, 0, 0), vec3(0, 0.4, 0));
-				gl::rotate(angleAxis(float(armRotations[5].y), vec3(0, 1, 0)));
-				Helpers::rotateFromBase(float(armRotations[5].z), vec3(0, 0, 1), vec3(0, 0.4, 0));
-				drawHands(false);
-			}
-			gl::popModelMatrix();
-		}
-		gl::popModelMatrix();
-	}
-	gl::popModelMatrix();
+void Player::allRotations(vec3 thetas, vec3 distance) {
+	Helpers::rotateFromBase(float(thetas.x), vec3(1, 0, 0), distance);
+	gl::rotate(angleAxis(float(thetas.y), vec3(0, 1, 0)));
+	Helpers::rotateFromBase(float(thetas.z), vec3(0, 0, 1), distance);
 }
 
 std::vector<glm::vec3> Player::fabrik(std::vector<glm::vec3>& joint_positions, const glm::vec3& target_position, const std::vector<float>& distances, float tolerance) {

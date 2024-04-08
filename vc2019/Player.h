@@ -45,6 +45,7 @@ public:
 	void drawArms();
 	void drawHands(bool right);
 	void defineJoints();
+	void allRotations(vec3 thetas, vec3 distance);
 
 	void getJointPositions(Joint* curJoint, vec3 curAngle, std::vector<vec3>* positions);
 	vec3 Player::fretToWorldCoordinates(const vec3& fretCoordinates);
