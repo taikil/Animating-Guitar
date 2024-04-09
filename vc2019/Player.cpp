@@ -216,6 +216,9 @@ void Player::IKSolver(bool right, const vec3& target_position) {
 		vec3 temp = armRotationsL.back();
 		armRotationsL = newThetas;
 		armRotationsL.push_back(temp);
+		armRotationsL[0].y = -armRotationsL[0].y;
+		armRotationsL[1].y = -armRotationsL[1].y;
+		armRotationsL[2].y = -armRotationsL[2].y;
 	}
 
 }
@@ -299,7 +302,7 @@ std::vector<glm::vec3> Player::fabrik(std::vector<glm::vec3>& joint_positions, c
 		while (difA > tolerance) {
 			// Stage 1: Forward Reaching
 			joint_positions.back() = target_position;
-			for (int i = n - 1; i > 0; i--) {
+			for (int i = n - 2; i > 0; i--) {
 				float ri = glm::length(joint_positions[i + 1] - joint_positions[i]);
 				float lambdai = distances[i] / ri;
 				joint_positions[i] = (1.0f - lambdai) * joint_positions[i + 1] + lambdai * joint_positions[i];
@@ -307,7 +310,7 @@ std::vector<glm::vec3> Player::fabrik(std::vector<glm::vec3>& joint_positions, c
 
 			// Stage 2: Backward Reaching
 			joint_positions[0] = b;
-			for (int i = 0; i < n - 1; i++) {
+			for (int i = 0; i < n - 2; i++) {
 				float ri = glm::length(joint_positions[i + 1] - joint_positions[i]);
 				float lambdai = distances[i] / ri;
 				joint_positions[i + 1] = (1.0f - lambdai) * joint_positions[i] + lambdai * joint_positions[i + 1];
@@ -346,6 +349,11 @@ void Player::draw() {
 
 	gl::pushModelMatrix();
 	{
+		gl::pushModelMatrix();
+		gl::translate(getCurrentNotePos());
+		gl::scale(1.1, 1.1, 1.1);
+		sampleDot->draw();
+		gl::popModelMatrix();
 		//Rotate guitar, keep in world co-ords
 		gl::pushModelMatrix();
 		{
