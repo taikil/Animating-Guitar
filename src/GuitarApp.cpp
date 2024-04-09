@@ -87,9 +87,8 @@ void GuitarApp::mouseDrag(MouseEvent event) {
 
 void GuitarApp::update()
 {
-
-
-
+	vec3 pos = player.getCurrentNotePos();
+	player.IKSolver(false, pos);
 }
 
 void GuitarApp::draw()

@@ -47,9 +47,12 @@ public:
 	void defineJoints();
 	void allRotations(vec3 thetas, vec3 distance);
 
+
+	std::vector<glm::vec3> computeJointRotations(const std::vector<glm::vec3>& joint_positions);
 	void getJointPositions(Joint* curJoint, vec3 curAngle, std::vector<vec3>* positions);
 	vec3 Player::fretToWorldCoordinates(const vec3& fretCoordinates);
 	vec3 getCurrentNotePos();
+	void IKSolver(bool right, const vec3& target_position);
 	std::vector<vec3> fabrik(std::vector<vec3>& joint_positions, const vec3& target_position, const std::vector<float>& distances, float tolerance = 0.01f);
 
 	gl::BatchRef	sampleDot;
@@ -65,8 +68,14 @@ private:
 	Hand rHand;
 	// x y z rotation
 	// [ RShoulder, RForearm, RWrist, LShoulder, LForearm, LWrist ]
-	std::vector<vec3> armTranslations;
-	std::vector<vec3> armRotations;
+	std::vector<vec3> armTranslationsR = { vec3(-1.1, 0, 0), vec3(0, 1.333, 0), vec3(0, 0.9, 0) };
+	std::vector<vec3> armTranslationsL = { vec3(1.1, 0, 0), vec3(0, 1.333, 0), vec3(0, 0.9, 0) };
+	std::vector<vec3> armPositionR = { vec3(-1.1, 0, 0), vec3(0, 1.333, 0), vec3(0, 0.9, 0) };
+	std::vector<vec3> armPositionL = { vec3(1.1, 0, 0), vec3(0, 1.333, 0), vec3(0, 0.9, 0) };
+	// TODO Return position of each joint!!!
+	std::vector<float> distances = { 1.333, 1.333, 0.9 };
+	std::vector<vec3> armRotationsR;
+	std::vector<vec3> armRotationsL;
 	float armRootRotation = M_PI / 2;
 	//Finger names: Index: i, Middle: m, Ring: r, Pinky: p, Thumb: t
 	std::vector<float> fingerLengths = { 0.416f, 0.416f, 0.208f, 0.52f, 0.52f, 0.26f, 0.468f, 0.468f, 0.234f, 0.338f, 0.338f, 0.169f }; // Each finger segment lens * 1.3 (capsule len)

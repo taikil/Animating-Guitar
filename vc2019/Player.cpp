@@ -28,11 +28,10 @@ void Player::setup() {
 
 	lHand = Hand(false, fingerAngles);
 	rHand = Hand(true, fingerAngles);
-	armRotations.resize(6, glm::vec3(M_PI / 6, 0, 0));
-	armTranslations.resize(7);
-	armTranslations = { vec3(-1.1, 0, 0), vec3(0, 1.333, 0),
-						vec3(0, 0.9, 0), vec3(1.1, 0, 0),
-						vec3(0, 1.333 ,0), vec3(0, 0.9, 0) };
+	armRotationsR.resize(3, glm::vec3(M_PI / 3, 0, 0));
+	armRotationsL.resize(3, glm::vec3(M_PI / 6, 0, 0));
+	armTranslationsR.resize(3);
+	armTranslationsL.resize(3);
 }
 
 void Player::update() {
@@ -158,24 +157,34 @@ void Player::drawHead() {
 void Player::drawArms() {
 
 	//Right Arm
-	for (int i = 0; i <= 3; i += 3) {
+	for (int i = 0; i < 2; i++) {
+		std::vector<vec3> translation = i == 0 ? armTranslationsR : armTranslationsL;
+		std::vector<vec3> rotations = i == 0 ? armRotationsR : armRotationsL;
 		gl::pushModelMatrix();
 		{
-			gl::translate(armTranslations[0 + i]);
+			gl::translate(translation[0]);
 			Helpers::rotateFromBase(i == 0 ? armRootRotation : -armRootRotation,
 				vec3(0, 0, 1), vec3(i == 0 ? 0.666 : -0.666, 0, 0)); // T - pose rotation from root
-			allRotations(armRotations[0 + i], vec3(0, 0.666, 0));
+			allRotations(rotations[0], vec3(0, 0.666, 0));
 			mArm->draw(); //Shoulder
+
+			vec3 currentTranslation = gl::getModelMatrix() * vec4(0, 0, 0, 1);
+			if (i == 0) armPositionR[0] = currentTranslation;
+			else armPositionL[0] = currentTranslation;
 			gl::pushModelMatrix();
 			{
-				gl::translate(armTranslations[1 + i]);
-				allRotations(armRotations[1 + i], vec3(0, 0.666, 0));
+				gl::translate(translation[1]);
+				allRotations(rotations[1], vec3(0, 0.666, 0));
 				mArm->draw(); // Forearm
+				if (i == 0) armPositionR[1] = currentTranslation;
+				else armPositionL[1] = currentTranslation;
 				gl::pushModelMatrix();
 				{
-					gl::translate(armTranslations[2 + i]);
-					allRotations(armRotations[2 + i], vec3(0, 0.4, 0));
+					gl::translate(translation[2]);
+					allRotations(rotations[2], vec3(0, 0.4, 0));
 					drawHands(i == 0 ? true : false);
+					if (i == 0) armPositionR[2] = currentTranslation;
+					else armPositionL[2] = currentTranslation;
 				}
 				gl::popModelMatrix();
 			}
@@ -191,77 +200,45 @@ void Player::allRotations(vec3 thetas, vec3 distance) {
 	Helpers::rotateFromBase(float(thetas.z), vec3(0, 0, 1), distance);
 }
 
-std::vector<glm::vec3> Player::fabrik(std::vector<glm::vec3>& joint_positions, const glm::vec3& target_position, const std::vector<float>& distances, float tolerance) {
-	int n = joint_positions.size();
-	float dist = glm::length(joint_positions[0] - target_position);
-
-	std::vector<glm::vec3> updated_joint_angles;
-	updated_joint_angles.reserve(n);
-
-	if (dist > std::accumulate(distances.begin(), distances.end(), 0.0f) + tolerance) {
-		for (int i = 0; i < n - 1; i++) {
-			float ri = glm::length(target_position - joint_positions[i]);
-			float lambdai = distances[i] / ri;
-			// Calculate the rotation axis and angle
-			glm::vec3 axis = glm::normalize(glm::cross(joint_positions[i + 1] - joint_positions[i], target_position - joint_positions[i]));
-			float angle = acos(glm::dot(glm::normalize(joint_positions[i + 1] - joint_positions[i]), glm::normalize(target_position - joint_positions[i])));
-			// Apply rotation to the next joint
-			glm::quat rotation = glm::angleAxis(angle, axis);
-			joint_positions[i + 1] = joint_positions[i] + rotation * (joint_positions[i + 1] - joint_positions[i]) * lambdai;
-			// Calculate and store the updated joint angles
-			updated_joint_angles.push_back(rotation * glm::vec3(1.0f, 0.0f, 0.0f));
-		}
+void Player::IKSolver(bool right, const vec3& target_position) {
+	std::vector<vec3> newPos;
+	std::vector<vec3> newThetas;
+	if (right) {
+		newPos = fabrik(armPositionR, target_position, distances);
+		newThetas = computeJointRotations(newPos);
+		vec3 temp = armRotationsR.back();
+		armRotationsR = newThetas;
+		armRotationsR.push_back(temp);
 	}
 	else {
-		glm::vec3 b = joint_positions[0];
-		float difA = glm::length(joint_positions.back() - target_position);
-		while (difA > tolerance) {
-			// Stage 1: Forward Reaching
-			joint_positions.back() = target_position;
-			for (int i = n - 1; i > 0; i--) {
-				float ri = glm::length(joint_positions[i + 1] - joint_positions[i]);
-				float lambdai = distances[i] / ri;
-				// Calculate the rotation axis and angle
-				glm::vec3 axis = glm::normalize(glm::cross(joint_positions[i] - joint_positions[i + 1], joint_positions[i - 1] - joint_positions[i]));
-				float angle = acos(glm::dot(glm::normalize(joint_positions[i] - joint_positions[i + 1]), glm::normalize(joint_positions[i - 1] - joint_positions[i])));
-				// Apply rotation to the current joint
-				glm::quat rotation = glm::angleAxis(angle, axis);
-				joint_positions[i] = joint_positions[i + 1] + rotation * (joint_positions[i] - joint_positions[i + 1]) * lambdai;
-				// Calculate and store the updated joint angles
-				updated_joint_angles.push_back(rotation * glm::vec3(1.0f, 0.0f, 0.0f));
-			}
-
-			// Stage 2: Backward Reaching
-			joint_positions[0] = b;
-			for (int i = 0; i < n - 1; i++) {
-				float ri = glm::length(joint_positions[i + 1] - joint_positions[i]);
-				float lambdai = distances[i] / ri;
-				// Calculate the rotation axis and angle
-				glm::vec3 axis = glm::normalize(glm::cross(joint_positions[i] - joint_positions[i + 1], joint_positions[i + 2] - joint_positions[i + 1]));
-				float angle = acos(glm::dot(glm::normalize(joint_positions[i] - joint_positions[i + 1]), glm::normalize(joint_positions[i + 2] - joint_positions[i + 1])));
-				// Apply rotation to the next joint
-				glm::quat rotation = glm::angleAxis(angle, axis);
-				joint_positions[i + 1] = joint_positions[i] + rotation * (joint_positions[i + 1] - joint_positions[i]) * lambdai;
-				// Calculate and store the updated joint angles
-				updated_joint_angles.push_back(rotation * glm::vec3(1.0f, 0.0f, 0.0f));
-			}
-
-			difA = glm::length(joint_positions.back() - target_position);
-		}
+		newPos = fabrik(armPositionL, target_position, distances);
+		newThetas = computeJointRotations(newPos);
+		vec3 temp = armRotationsL.back();
+		armRotationsL = newThetas;
+		armRotationsL.push_back(temp);
 	}
-	return updated_joint_angles;
-}
 
+}
 
 //std::vector<glm::vec3> Player::fabrik(std::vector<glm::vec3>& joint_positions, const glm::vec3& target_position, const std::vector<float>& distances, float tolerance) {
 //	int n = joint_positions.size();
 //	float dist = glm::length(joint_positions[0] - target_position);
 //
+//	std::vector<glm::vec3> updated_joint_angles;
+//	updated_joint_angles.reserve(n);
+//
 //	if (dist > std::accumulate(distances.begin(), distances.end(), 0.0f) + tolerance) {
 //		for (int i = 0; i < n - 1; i++) {
 //			float ri = glm::length(target_position - joint_positions[i]);
 //			float lambdai = distances[i] / ri;
-//			joint_positions[i + 1] = (1.0f - lambdai) * joint_positions[i] + lambdai * target_position;
+//			// Calculate the rotation axis and angle
+//			glm::vec3 axis = glm::normalize(glm::cross(joint_positions[i + 1] - joint_positions[i], target_position - joint_positions[i]));
+//			float angle = acos(glm::dot(glm::normalize(joint_positions[i + 1] - joint_positions[i]), glm::normalize(target_position - joint_positions[i])));
+//			// Apply rotation to the next joint
+//			glm::quat rotation = glm::angleAxis(angle, axis);
+//			joint_positions[i + 1] = joint_positions[i] + rotation * (joint_positions[i + 1] - joint_positions[i]) * lambdai;
+//			// Calculate and store the updated joint angles
+//			updated_joint_angles.push_back(rotation * glm::vec3(1.0f, 0.0f, 0.0f));
 //		}
 //	}
 //	else {
@@ -273,7 +250,14 @@ std::vector<glm::vec3> Player::fabrik(std::vector<glm::vec3>& joint_positions, c
 //			for (int i = n - 1; i > 0; i--) {
 //				float ri = glm::length(joint_positions[i + 1] - joint_positions[i]);
 //				float lambdai = distances[i] / ri;
-//				joint_positions[i] = (1.0f - lambdai) * joint_positions[i + 1] + lambdai * joint_positions[i];
+//				// Calculate the rotation axis and angle
+//				glm::vec3 axis = glm::normalize(glm::cross(joint_positions[i] - joint_positions[i + 1], joint_positions[i - 1] - joint_positions[i]));
+//				float angle = acos(glm::dot(glm::normalize(joint_positions[i] - joint_positions[i + 1]), glm::normalize(joint_positions[i - 1] - joint_positions[i])));
+//				// Apply rotation to the current joint
+//				glm::quat rotation = glm::angleAxis(angle, axis);
+//				joint_positions[i] = joint_positions[i + 1] + rotation * (joint_positions[i] - joint_positions[i + 1]) * lambdai;
+//				// Calculate and store the updated joint angles
+//				updated_joint_angles.push_back(rotation * glm::vec3(1.0f, 0.0f, 0.0f));
 //			}
 //
 //			// Stage 2: Backward Reaching
@@ -281,14 +265,81 @@ std::vector<glm::vec3> Player::fabrik(std::vector<glm::vec3>& joint_positions, c
 //			for (int i = 0; i < n - 1; i++) {
 //				float ri = glm::length(joint_positions[i + 1] - joint_positions[i]);
 //				float lambdai = distances[i] / ri;
-//				joint_positions[i + 1] = (1.0f - lambdai) * joint_positions[i] + lambdai * joint_positions[i + 1];
+//				// Calculate the rotation axis and angle
+//				glm::vec3 axis = glm::normalize(glm::cross(joint_positions[i] - joint_positions[i + 1], joint_positions[i + 2] - joint_positions[i + 1]));
+//				float angle = acos(glm::dot(glm::normalize(joint_positions[i] - joint_positions[i + 1]), glm::normalize(joint_positions[i + 2] - joint_positions[i + 1])));
+//				// Apply rotation to the next joint
+//				glm::quat rotation = glm::angleAxis(angle, axis);
+//				joint_positions[i + 1] = joint_positions[i] + rotation * (joint_positions[i + 1] - joint_positions[i]) * lambdai;
+//				// Calculate and store the updated joint angles
+//				updated_joint_angles.push_back(rotation * glm::vec3(1.0f, 0.0f, 0.0f));
 //			}
 //
 //			difA = glm::length(joint_positions.back() - target_position);
 //		}
 //	}
-//	return joint_positions;
+//	return updated_joint_angles;
 //}
+
+
+std::vector<glm::vec3> Player::fabrik(std::vector<glm::vec3>& joint_positions, const glm::vec3& target_position, const std::vector<float>& distances, float tolerance) {
+	int n = joint_positions.size();
+	float dist = glm::length(joint_positions[0] - target_position);
+
+	if (dist > std::accumulate(distances.begin(), distances.end(), 0.0f) + tolerance) {
+		for (int i = 0; i < n - 1; i++) {
+			float ri = glm::length(target_position - joint_positions[i]);
+			float lambdai = distances[i] / ri;
+			joint_positions[i + 1] = (1.0f - lambdai) * joint_positions[i] + lambdai * target_position;
+		}
+	}
+	else {
+		glm::vec3 b = joint_positions[0];
+		float difA = glm::length(joint_positions.back() - target_position);
+		while (difA > tolerance) {
+			// Stage 1: Forward Reaching
+			joint_positions.back() = target_position;
+			for (int i = n - 1; i > 0; i--) {
+				float ri = glm::length(joint_positions[i + 1] - joint_positions[i]);
+				float lambdai = distances[i] / ri;
+				joint_positions[i] = (1.0f - lambdai) * joint_positions[i + 1] + lambdai * joint_positions[i];
+			}
+
+			// Stage 2: Backward Reaching
+			joint_positions[0] = b;
+			for (int i = 0; i < n - 1; i++) {
+				float ri = glm::length(joint_positions[i + 1] - joint_positions[i]);
+				float lambdai = distances[i] / ri;
+				joint_positions[i + 1] = (1.0f - lambdai) * joint_positions[i] + lambdai * joint_positions[i + 1];
+			}
+
+			difA = glm::length(joint_positions.back() - target_position);
+		}
+	}
+	return joint_positions;
+}
+
+std::vector<glm::vec3> Player::computeJointRotations(const std::vector<glm::vec3>& joint_positions) {
+	std::vector<glm::vec3> joint_rotations;
+
+	// Iterate over each joint position
+	for (size_t i = 0; i < joint_positions.size() - 1; ++i) {
+		// Calculate the direction vector between the current joint and the next joint
+		glm::vec3 direction = glm::normalize(joint_positions[i + 1] - joint_positions[i]);
+
+		// Calculate the rotation angles using trigonometry
+		// You may need to adjust this calculation based on your coordinate system and requirements
+		float pitch = std::asin(direction.y);
+		float yaw = std::atan2(direction.x, direction.z);
+		float roll = 0.0f;  // You may need to calculate this depending on your requirements
+
+		// Store the rotation angles as a glm::vec3
+		joint_rotations.push_back(glm::vec3(pitch, yaw, roll));
+	}
+
+	return joint_rotations;
+}
+
 
 void Player::draw() {
 	//CI_LOG_V("MyApp draw() function");
