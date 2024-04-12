@@ -26,11 +26,11 @@ void Player::setup() {
 
 	auto rot = geom::Rotate(M_PI / 2, vec3(0, 0, 1));
 
-	mArm = gl::Batch::create(arm >> rot, shader);
+	mArm = gl::Batch::create(arm, shader);
 
 	lHand = Hand(false, fingerAngles);
 	rHand = Hand(true, fingerAngles);
-	//armRotationsR.resize(3, glm::vec3(0, 0, 0));
+	//armRotationsR.resize(3, glm::vec3(M_PI / 12, 0, 0));
 	//armRotationsL.resize(3, glm::vec3(0, 0, 0));
 	armRotationsR.resize(3, glm::vec3(M_PI / 12, M_PI / 12, M_PI / 12));
 	armRotationsL.resize(3, glm::vec3(M_PI / 12, M_PI / 12, M_PI / 12));
@@ -169,10 +169,12 @@ void Player::drawArms() {
 		gl::pushModelMatrix();
 		{
 			gl::translate(translation[0]);
-			allRotations(rotations[0], vec3(distances[0] / i == 0 ? -2 : 2, 0, 0));
+			Helpers::rotateFromBase(i == 0 ? armRootRotation : -armRootRotation,
+				vec3(0, 0, 1), vec3(i == 0 ? 0.666 : -0.666, 0, 0)); // T - pose rotation from root
+			allRotations(rotations[0], vec3(0, 0.666, 0));
 			mArm->draw(); //Shoulder
 			gl::pushModelMatrix();
-			gl::translate(-0.666, 0, 0);
+			gl::translate(0, -0.666, 0);
 			currentTranslation = gl::getModelMatrix() * vec4(0, 0, 0, 1);
 			if (i == 0) armPositionR[0] = currentTranslation;
 			else armPositionL[0] = currentTranslation;
@@ -180,10 +182,10 @@ void Player::drawArms() {
 			gl::pushModelMatrix();
 			{
 				gl::translate(translation[1]);
-				allRotations(rotations[1], vec3(distances[1] / i == 0 ? -2 : 2, 0, 0));
+				allRotations(rotations[1], vec3(0, 0.666, 0));
 				mArm->draw(); // Forearm
 				gl::pushModelMatrix();
-				gl::translate(-0.666, 0, 0);
+				gl::translate(0, -0.666, 0);
 				currentTranslation = gl::getModelMatrix() * vec4(0, 0, 0, 1);
 				if (i == 0) armPositionR[1] = currentTranslation;
 				else armPositionL[1] = currentTranslation;
@@ -191,10 +193,10 @@ void Player::drawArms() {
 				gl::pushModelMatrix();
 				{
 					gl::translate(translation[2]);
-					allRotations(rotations[2], vec3(distances[2] / i == 0 ? -2 : 2, 0, 0));
+					allRotations(rotations[2], vec3(0, 0.4, 0));
 					drawHands(i == 0 ? true : false);
 					gl::pushModelMatrix();
-					gl::translate(-0.2, 0, 0);
+					gl::translate(0, -0.2, 0);
 					currentTranslation = gl::getModelMatrix() * vec4(0, 0, 0, 1);
 					if (i == 0) armPositionR[2] = currentTranslation;
 					else armPositionL[2] = currentTranslation;
@@ -209,8 +211,8 @@ void Player::drawArms() {
 }
 
 void Player::allRotations(vec3 thetas, vec3 distance) {
-	gl::rotate(angleAxis(float(thetas.x), vec3(1, 0, 0)));
-	Helpers::rotateFromBase(float(thetas.y), vec3(0, 1, 0), distance);
+	Helpers::rotateFromBase(float(thetas.x), vec3(1, 0, 0), distance);
+	gl::rotate(angleAxis(float(thetas.y), vec3(0, 1, 0)));
 	Helpers::rotateFromBase(float(thetas.z), vec3(0, 0, 1), distance);
 }
 
@@ -241,9 +243,10 @@ void Player::IKSolver(bool right, const vec3& target_position) {
 		vec3 temp = armRotationsL.back();
 		armRotationsL = newThetas;
 		armRotationsL.push_back(temp);
-		//armRotationsL[0].y = -armRotationsL[0].y;
-		//armRotationsL[1].y = -armRotationsL[1].y;
-		//armRotationsL[2].y = -armRotationsL[2].y;
+		float temp = armPositionL[0].x;
+		armRotationsL[0].y = -armRotationsL[0].y;
+		armRotationsL[1].y = -armRotationsL[1].y;
+		armRotationsL[2].y = -armRotationsL[2].y;
 	}
 
 }
@@ -354,16 +357,6 @@ void Player::draw() {
 		gl::scale(3.1, 3.1, 3.1);
 		sampleDot->draw();
 		gl::popModelMatrix();
-
-		// X-axis (Red)
-		gl::drawLine(vec3(0,0,0), vec3(10, 0, 0));
-
-		// Y-axis (Green)
-		gl::drawLine(vec3(0, 0, 0), vec3(0, 10, 0));
-
-		// Z-axis (Blue)
-		gl::drawLine(vec3(0, 0, 0), vec3(0, 0, 10));
-
 
 		for (int i = 0; i < armPositionL.size(); i++) {
 			gl::pushModelMatrix();

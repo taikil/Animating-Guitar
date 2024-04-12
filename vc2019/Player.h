@@ -69,10 +69,10 @@ private:
 	Hand rHand;
 	// x y z rotation
 	// [ RShoulder, RForearm, RWrist, LShoulder, LForearm, LWrist ]
-	std::vector<vec3> armTranslationsR = { vec3(-1.3, 1, 0), vec3(-1.333, 0, 0), vec3(-0.9, 0, 0) };
-	std::vector<vec3> armTranslationsL = { vec3(1.3, 1, 0), vec3(1.333, 0 ,0), vec3(0.9, 0, 0) };
-	std::vector<vec3> armPositionR = { vec3(-1.1, 0, 0), vec3(-1.333, 0, 0), vec3(-0.9, 0, 0) };
-	std::vector<vec3> armPositionL = { vec3(1.1, 0, 0), vec3(1.333, 0 ,0), vec3(0.9, 0, 0) };
+	std::vector<vec3> armTranslationsR = { vec3(-1.1, 0, 0), vec3(0, 1.333, 0), vec3(0, 0.9, 0) };
+	std::vector<vec3> armTranslationsL = { vec3(1.1, 0, 0), vec3(0, 1.333, 0), vec3(0, 0.9, 0) };
+	std::vector<vec3> armPositionR = { vec3(-1.1, 0, 0), vec3(0, 1.333, 0), vec3(0, 0.9, 0) };
+	std::vector<vec3> armPositionL = { vec3(1.1, 0, 0), vec3(0, 1.333, 0), vec3(0, 0.9, 0) };
 	// TODO Return position of each joint!!!
 	std::vector<float> distances = { 1.333, 1.333, 0.9 };
 	std::vector<vec3> armRotationsR;
@@ -86,7 +86,7 @@ private:
 	std::vector<Joint> rArmJoints;
 	std::vector<Joint> lArmJoints;
 
-	bool printedTranslation = false;
+	bool printedTranslation = false; 
 
 	vec3 thumbKnuckleLen = vec3(0.1, 0.4, 0.3);
 	float thumbLen = 0.7;
