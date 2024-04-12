@@ -48,8 +48,8 @@ void GuitarApp::setup()
 
 	player.setup();
 	currentTarget = player.getCurrentNotePos();
-	//player.IKSolver(false, currentTarget);
-	//player.IKSolver(true, vec3(0.5, 0.5, 1.5));
+	player.IKSolver(false, currentTarget);
+	player.IKSolver(true, vec3(0.5, 0.5, 1.5));
 }
 
 void GuitarApp::mouseDown(MouseEvent event)

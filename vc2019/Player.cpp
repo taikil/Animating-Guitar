@@ -30,10 +30,10 @@ void Player::setup() {
 
 	lHand = Hand(false, fingerAngles);
 	rHand = Hand(true, fingerAngles);
-	//armRotationsR.resize(3, glm::vec3(M_PI / 12, 0, 0));
-	//armRotationsL.resize(3, glm::vec3(0, 0, 0));
-	armRotationsR.resize(3, glm::vec3(M_PI / 12, M_PI / 12, M_PI / 12));
-	armRotationsL.resize(3, glm::vec3(M_PI / 12, M_PI / 12, M_PI / 12));
+	//armRotationsR.resize(3, glm::vec3(0, 0, M_PI / 12));
+	//armRotationsL.resize(3, glm::vec3(0, 0, M_PI / 12));
+	armRotationsR.resize(3, glm::vec3(M_PI / 12, M_PI / 12, 0));
+	armRotationsL.resize(3, glm::vec3(M_PI / 12, -M_PI / 12, 0));
 	armTranslationsR.resize(3);
 	armTranslationsL.resize(3);
 
@@ -45,71 +45,6 @@ void Player::update() {
 vec3 Player::getCurrentNotePos() {
 	return fretPositions[0][0];
 	//return vec3(1.669, 1.716, 1.270);
-}
-
-void Player::defineJoints() {
-	lHandJoints.reserve(fingerLengths.size());
-	rHandJoints.reserve(fingerLengths.size());
-	lArmJoints.reserve(3);
-	rArmJoints.reserve(3);
-
-	vec3 position(0.0f); // Starting position
-	vec3 angles(0.0f);   // Starting angles
-
-	//Bicep, forearm and palm/wrist
-	for (int i = 0; i < 3; i++) {
-		Joint joint;
-		joint.position = i == 0 ? vec3(1.1, 0, 0) : position;
-		joint.length = i == 2 ? 0.8 : 1.3;
-		joint.angles = angles;
-
-
-		lHandJoints.push_back(joint);
-		joint.position = -joint.position;
-		rHandJoints.push_back(joint);
-	}
-
-	for (int i = 0; i < lHandJoints.size() - 1; i++) {
-		lHandJoints[i].next = &lHandJoints[i + 1];
-		lHandJoints[i + 1].prev = &lHandJoints[i];
-
-		rHandJoints[i].next = &rHandJoints[i + 1];
-		rHandJoints[i + 1].prev = &rHandJoints[i];
-	}
-
-	//Fingers
-
-	for (float length : fingerLengths) {
-		// Create a new joint
-		Joint joint;
-		joint.position = position;
-		joint.length = length;
-		joint.angles = angles;
-
-		// Add the joint to the vector
-		lHandJoints.push_back(joint);
-		rHandJoints.push_back(joint);
-
-		// Update position for the next joint (example: move along x-axis)
-		position.x += length; // Update x-coordinate
-	}
-
-
-}
-
-void Player::getJointPositions(Joint* curJoint, vec3 totalAngle, std::vector<vec3>* positions) {
-	Joint* parent = curJoint->prev;
-	vec3 curAngle = curJoint->angles + totalAngle;
-
-	// Calculate position using trigonometric functions
-	float curPositionX = parent->position.x + curJoint->length * std::cos(curAngle[0]); // X-coordinate
-	float curPositionY = parent->position.y + curJoint->length * std::sin(curAngle[1]); // Y-coordinate
-	float curPositionZ = parent->position.z + curJoint->length * std::tan(curAngle[2]); // Z-coordinate
-
-
-	if (curJoint->next != nullptr) {
-		getJointPositions(curJoint->next, curAngle, positions);
-	}
 }
 
 void Player::drawBody() {
@@ -224,11 +159,10 @@ void Player::IKSolver(bool right, const vec3& target_position) {
 		newPos = fabrik(armPositionR, target_position, distances);
 		newThetas = computeJointRotations(newPos);
 		vec3 temp = armRotationsR.back();
+		//newThetas[0].x = -newThetas[0].x;
+		//newThetas[1].x = -newThetas[1].x;
 		armRotationsR = newThetas;
 		armRotationsR.push_back(temp);
-		//armRotationsR[0].z = -armRotationsR[0].z;
-		//armRotationsR[1].z = -armRotationsR[1].z;
-		//armRotationsR[2].z = -armRotationsR[2].z;
 	}
 	else {
 		if (glm::length(armPositionL.back() - target_position) < 0.01f) {
@@ -236,17 +170,17 @@ void Player::IKSolver(bool right, const vec3& target_position) {
 			return;
 		}
 		newPos = fabrik(armPositionL, target_position, distances);
-		CI_LOG_V("vec3: (" << armPositionL[0].x << ", " << armPositionL[0].y << ", " << armPositionL[0].z << ")");
-		CI_LOG_V("vec3: (" << armPositionL[1].x << ", " << armPositionL[1].y << ", " << armPositionL[1].z << ")");
-		CI_LOG_V("vec3: (" << armPositionL[2].x << ", " << armPositionL[2].y << ", " << armPositionL[2].z << ")");
+		CI_LOG_V("shoulder: (" << armPositionL[0].x << ", " << armPositionL[0].y << ", " << armPositionL[0].z << ")");
+		CI_LOG_V("forearm: (" << armPositionL[1].x << ", " << armPositionL[1].y << ", " << armPositionL[1].z << ")");
+		CI_LOG_V("hand: (" << armPositionL[2].x << ", " << armPositionL[2].y << ", " << armPositionL[2].z << ")");
 		newThetas = computeJointRotations(newPos);
 		vec3 temp = armRotationsL.back();
+		//newThetas[0].y = -newThetas[0].y;
+		//newThetas[1].y = -newThetas[1].y;
 		armRotationsL = newThetas;
+		CI_LOG_V("shoulder angle: (" << newThetas[0].x * 180 / M_PI << ", " << newThetas[0].y * 180 / M_PI << ", " << newThetas[0].z * 180 / M_PI << ")");
+		CI_LOG_V("forearm angle: (" << newThetas[1].x * 180 / M_PI << ", " << newThetas[1].y * 180 / M_PI << ", " << newThetas[1].z * 180 / M_PI << ")");
 		armRotationsL.push_back(temp);
-		float temp = armPositionL[0].x;
-		armRotationsL[0].y = -armRotationsL[0].y;
-		armRotationsL[1].y = -armRotationsL[1].y;
-		armRotationsL[2].y = -armRotationsL[2].y;
 	}
 
 }
@@ -298,11 +232,15 @@ std::vector<glm::vec3> Player::computeJointRotations(const std::vector<glm::vec3
 		glm::vec3 direction = glm::normalize(joint_positions[i + 1] - joint_positions[i]);
 
 		// Calculate the rotation angles using trigonometry
-		float x = std::atan2(direction.y, direction.z);
-		float y = std::atan2(direction.x, direction.z);
+		float y = std::atan2(direction.y, direction.z); //swapped because of earlier rotation
+		float x = std::atan2(direction.x, direction.z);
 		float z = std::atan2(direction.x, direction.y);
 
 		joint_rotations.push_back(glm::vec3(x, y, z));
+	}
+
+	for (int i = joint_rotations.size() - 1; i > 0; i--) {
+		joint_rotations[i] -= joint_rotations[i - 1]; // get into it's own coordinates
 	}
 
 	return joint_rotations;
@@ -357,6 +295,15 @@ void Player::draw() {
 		gl::scale(3.1, 3.1, 3.1);
 		sampleDot->draw();
 		gl::popModelMatrix();
+
+		gl::color(1, 0, 0);
+		gl::drawLine(vec3(0, 0, 0), vec3(10, 0, 0));
+
+		gl::color(0, 1, 0);
+		gl::drawLine(vec3(0, 0, 0), vec3(0, 10, 0));
+
+		gl::color(0, 0, 1);
+		gl::drawLine(vec3(0, 0, 0), vec3(0, 0, 10));
 
 		for (int i = 0; i < armPositionL.size(); i++) {
 			gl::pushModelMatrix();
