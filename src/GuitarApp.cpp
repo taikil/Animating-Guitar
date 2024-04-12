@@ -18,6 +18,7 @@ public:
 	void mouseDrag(MouseEvent event) override;
 	void update() override;
 	void draw() override;
+	void keyDown(ci::app::KeyEvent event) override;
 
 
 	static const int NUM_SLICES = 12;
@@ -30,8 +31,9 @@ private:
 	Player player = Player();
 	vec2 mInitialMousePos;
 	quat mRotationQuat;
-	vec3 eyePos = vec3(0, 0, -5);
+	vec3 eyePos = vec3(0, 0, 5);
 	vec3 currentTarget;
+	bool paused = true;
 };
 
 void GuitarApp::setup()
@@ -46,6 +48,8 @@ void GuitarApp::setup()
 
 	player.setup();
 	currentTarget = player.getCurrentNotePos();
+	//player.IKSolver(false, currentTarget);
+	//player.IKSolver(true, vec3(0.5, 0.5, 1.5));
 }
 
 void GuitarApp::mouseDown(MouseEvent event)
@@ -85,10 +89,18 @@ void GuitarApp::mouseDrag(MouseEvent event) {
 	}
 }
 
+void GuitarApp::keyDown(ci::app::KeyEvent event) {
+	if (event.getCode() == ci::app::KeyEvent::KEY_s) {
+		paused = !paused; // Toggle pause state
+	}
+}
+
 void GuitarApp::update()
 {
-	vec3 pos = player.getCurrentNotePos();
-	player.IKSolver(false, pos);
+	if (!paused) {
+		player.IKSolver(false, currentTarget);
+		player.IKSolver(true, vec3(0.5, 0.5, 1.5));
+	}
 }
 
 void GuitarApp::draw()
