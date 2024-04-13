@@ -30,12 +30,15 @@ void Player::setup() {
 
 	lHand = Hand(false, fingerAngles);
 	rHand = Hand(true, fingerAngles);
-	//armRotationsR.resize(3, glm::vec3(0, 0, M_PI / 12));
-	//armRotationsL.resize(3, glm::vec3(0, 0, M_PI / 12));
-	armRotationsR.resize(3, glm::vec3(M_PI / 12, M_PI / 12, 0));
-	armRotationsL.resize(3, glm::vec3(M_PI / 12, -M_PI / 12, 0));
-	armTranslationsR.resize(3);
-	armTranslationsL.resize(3);
+	armRotationsR.resize(3, glm::vec3(0, 0, 0));
+	armRotationsL.resize(3, glm::vec3(0, 0, 0));
+	//armRotationsR.resize(3, glm::vec3(M_PI / 12, M_PI / 12, 0));
+	//armRotationsL.resize(3, glm::vec3(M_PI / 12, -M_PI / 12, 0));
+	//armPositionR = computeJointPositions(armTranslationsR, distances, armRotationsR);
+	//armPositionL = computeJointPositions(armTranslationsL, distances, armRotationsL);
+	CI_LOG_V("shoulder: (" << armPositionL[0].x << ", " << armPositionL[0].y << ", " << armPositionL[0].z << ")");
+	CI_LOG_V("forearm: (" << armPositionL[1].x << ", " << armPositionL[1].y << ", " << armPositionL[1].z << ")");
+	CI_LOG_V("hand: (" << armPositionL[2].x << ", " << armPositionL[2].y << ", " << armPositionL[2].z << ")");
 
 }
 
@@ -43,7 +46,7 @@ void Player::update() {
 }
 
 vec3 Player::getCurrentNotePos() {
-	return fretPositions[0][0];
+	return fretPositions[8][3];
 	//return vec3(1.669, 1.716, 1.270);
 }
 
@@ -100,7 +103,6 @@ void Player::drawArms() {
 	for (int i = 0; i < 2; i++) {
 		std::vector<vec3> translation = i == 0 ? armTranslationsR : armTranslationsL;
 		std::vector<vec3> rotations = i == 0 ? armRotationsR : armRotationsL;
-		vec3 currentTranslation;
 		gl::pushModelMatrix();
 		{
 			gl::translate(translation[0]);
@@ -109,33 +111,15 @@ void Player::drawArms() {
 			allRotations(rotations[0], vec3(0, 0.666, 0));
 			mArm->draw(); //Shoulder
 			gl::pushModelMatrix();
-			gl::translate(0, -0.666, 0);
-			currentTranslation = gl::getModelMatrix() * vec4(0, 0, 0, 1);
-			if (i == 0) armPositionR[0] = currentTranslation;
-			else armPositionL[0] = currentTranslation;
-			gl::popModelMatrix();
-			gl::pushModelMatrix();
 			{
 				gl::translate(translation[1]);
 				allRotations(rotations[1], vec3(0, 0.666, 0));
 				mArm->draw(); // Forearm
 				gl::pushModelMatrix();
-				gl::translate(0, -0.666, 0);
-				currentTranslation = gl::getModelMatrix() * vec4(0, 0, 0, 1);
-				if (i == 0) armPositionR[1] = currentTranslation;
-				else armPositionL[1] = currentTranslation;
-				gl::popModelMatrix();
-				gl::pushModelMatrix();
 				{
 					gl::translate(translation[2]);
 					allRotations(rotations[2], vec3(0, 0.4, 0));
 					drawHands(i == 0 ? true : false);
-					gl::pushModelMatrix();
-					gl::translate(0, -0.2, 0);
-					currentTranslation = gl::getModelMatrix() * vec4(0, 0, 0, 1);
-					if (i == 0) armPositionR[2] = currentTranslation;
-					else armPositionL[2] = currentTranslation;
-					gl::popModelMatrix();
 				}
 				gl::popModelMatrix();
 			}
@@ -146,6 +130,7 @@ void Player::drawArms() {
 }
 
 void Player::allRotations(vec3 thetas, vec3 distance) {
+	//thetas *= 180 / M_PI;
 	Helpers::rotateFromBase(float(thetas.x), vec3(1, 0, 0), distance);
 	gl::rotate(angleAxis(float(thetas.y), vec3(0, 1, 0)));
 	Helpers::rotateFromBase(float(thetas.z), vec3(0, 0, 1), distance);
@@ -156,30 +141,33 @@ void Player::IKSolver(bool right, const vec3& target_position) {
 	std::vector<vec3> newThetas;
 	if (right) {
 		if (glm::length(armPositionR.back() - target_position) < 0.01f) return;
+
 		newPos = fabrik(armPositionR, target_position, distances);
 		newThetas = computeJointRotations(newPos);
 		vec3 temp = armRotationsR.back();
-		//newThetas[0].x = -newThetas[0].x;
-		//newThetas[1].x = -newThetas[1].x;
+		//newThetas[0].y = -newThetas[0].y;
+		newThetas[1].y = 0;
+
+		CI_LOG_V("shoulder angle R: (" << newThetas[0].x * 180 / M_PI << ", " << newThetas[0].y * 180 / M_PI << ", " << newThetas[0].z * 180 / M_PI << ")");
+		CI_LOG_V("forearm angle R: (" << newThetas[1].x * 180 / M_PI << ", " << newThetas[1].y * 180 / M_PI << ", " << newThetas[1].z * 180 / M_PI << ")");
 		armRotationsR = newThetas;
 		armRotationsR.push_back(temp);
 	}
 	else {
-		if (glm::length(armPositionL.back() - target_position) < 0.01f) {
-			CI_LOG_V("GOOD!!");
-			return;
-		}
+		if (glm::length(armPositionL.back() - target_position) < 0.01f) return;
+
 		newPos = fabrik(armPositionL, target_position, distances);
-		CI_LOG_V("shoulder: (" << armPositionL[0].x << ", " << armPositionL[0].y << ", " << armPositionL[0].z << ")");
-		CI_LOG_V("forearm: (" << armPositionL[1].x << ", " << armPositionL[1].y << ", " << armPositionL[1].z << ")");
-		CI_LOG_V("hand: (" << armPositionL[2].x << ", " << armPositionL[2].y << ", " << armPositionL[2].z << ")");
 		newThetas = computeJointRotations(newPos);
 		vec3 temp = armRotationsL.back();
+		//newThetas[0].x = -newThetas[0].x;
+		//newThetas[1].x = -newThetas[1].x;
 		//newThetas[0].y = -newThetas[0].y;
-		//newThetas[1].y = -newThetas[1].y;
+		newThetas[1].y = 0;
+		newThetas[0].z = -newThetas[0].z;
+		newThetas[1].z = -newThetas[1].z;
 		armRotationsL = newThetas;
-		CI_LOG_V("shoulder angle: (" << newThetas[0].x * 180 / M_PI << ", " << newThetas[0].y * 180 / M_PI << ", " << newThetas[0].z * 180 / M_PI << ")");
-		CI_LOG_V("forearm angle: (" << newThetas[1].x * 180 / M_PI << ", " << newThetas[1].y * 180 / M_PI << ", " << newThetas[1].z * 180 / M_PI << ")");
+		CI_LOG_V("shoulder angle L: (" << newThetas[0].x * 180 / M_PI << ", " << newThetas[0].y * 180 / M_PI << ", " << newThetas[0].z * 180 / M_PI << ")");
+		CI_LOG_V("forearm angle L: (" << newThetas[1].x * 180 / M_PI << ", " << newThetas[1].y * 180 / M_PI << ", " << newThetas[1].z * 180 / M_PI << ")");
 		armRotationsL.push_back(temp);
 	}
 
@@ -244,6 +232,26 @@ std::vector<glm::vec3> Player::computeJointRotations(const std::vector<glm::vec3
 	}
 
 	return joint_rotations;
+}
+
+std::vector<vec3> Player::computeJointPositions(const std::vector<vec3>& translations, const std::vector<float>& distances, const std::vector<vec3>& rotations)
+{
+	std::vector<vec3> jointPositions;
+	jointPositions.reserve(translations.size());
+
+	vec3 prevPosition = vec3(0, 0, 0);
+	//jointPositions.push_back(currentPosition);
+
+	for (size_t i = 0; i < translations.size(); ++i) {
+		// Compute the position of the current joint
+		vec3 currentPosition = prevPosition + rotations[i] * vec3(0, distances[i], 0) + translations[i];
+		jointPositions.push_back(currentPosition);
+
+		// Update previous position for the next joint
+		prevPosition = currentPosition;
+	}
+
+	return jointPositions;
 }
 
 void Player::drawFrets() {
@@ -311,6 +319,15 @@ void Player::draw() {
 			gl::scale(0.2, 1.0, 0.2);
 			mArm->draw();
 			gl::popModelMatrix();
+		}
+
+		for (int i = 0; i < armPositionR.size(); i++) {
+			gl::pushModelMatrix();
+			gl::translate(armPositionR[i]);
+			gl::scale(0.2, 1.0, 0.2);
+			mArm->draw();
+			gl::popModelMatrix();
+
 		}
 
 		gl::pushModelMatrix();
