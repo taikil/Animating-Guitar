@@ -34,6 +34,8 @@ private:
 	vec3 eyePos = vec3(0, 0, 5);
 	vec3 currentTarget;
 	bool paused = true;
+	int count = 0;
+	int string = 0;
 };
 
 void GuitarApp::setup()
@@ -47,7 +49,7 @@ void GuitarApp::setup()
 	gl::GlslProgRef	shader = gl::getStockShader(lambert);
 
 	player.setup();
-	currentTarget = player.getCurrentNotePos();
+	currentTarget = player.getCurrentNotePos(0, 0);
 	//player.IKSolver(false, currentTarget);
 	//player.IKSolver(true, vec3(0.5, 0.5, 1.5));
 }
@@ -97,7 +99,14 @@ void GuitarApp::keyDown(ci::app::KeyEvent event) {
 
 void GuitarApp::update()
 {
+	if (count == 20) count = 0;
+	if (string == 5) {
+		string = 0;
+		count++;
+	}
+	string++;
 	if (!paused) {
+		currentTarget = player.getCurrentNotePos(count, string);
 		player.IKSolver(false, currentTarget);
 		player.IKSolver(true, vec3(0.5, 0.5, 1.5));
 	}

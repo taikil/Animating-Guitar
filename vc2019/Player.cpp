@@ -45,8 +45,8 @@ void Player::setup() {
 void Player::update() {
 }
 
-vec3 Player::getCurrentNotePos() {
-	return fretPositions[8][3];
+vec3 Player::getCurrentNotePos(int a, int b) {
+	return fretPositions[a][b];
 	//return vec3(1.669, 1.716, 1.270);
 }
 
@@ -101,29 +101,33 @@ void Player::drawArms() {
 
 	//Right Arm i = 0
 	for (int i = 0; i < 2; i++) {
-		std::vector<vec3> translation = i == 0 ? armTranslationsR : armTranslationsL;
-		std::vector<vec3> rotations = i == 0 ? armRotationsR : armRotationsL;
+		std::vector<vec3> translation = i == 0 ? armPositionR : armPositionL;
+		//std::vector<vec3> rotations = i == 0 ? armRotationsR : armRotationsL;
 		gl::pushModelMatrix();
 		{
-			gl::translate(translation[0]);
-			Helpers::rotateFromBase(i == 0 ? armRootRotation : -armRootRotation,
-				vec3(0, 0, 1), vec3(i == 0 ? 0.666 : -0.666, 0, 0)); // T - pose rotation from root
-			allRotations(rotations[0], vec3(0, 0.666, 0));
-			mArm->draw(); //Shoulder
-			gl::pushModelMatrix();
-			{
-				gl::translate(translation[1]);
-				allRotations(rotations[1], vec3(0, 0.666, 0));
-				mArm->draw(); // Forearm
-				gl::pushModelMatrix();
-				{
-					gl::translate(translation[2]);
-					allRotations(rotations[2], vec3(0, 0.4, 0));
-					drawHands(i == 0 ? true : false);
-				}
-				gl::popModelMatrix();
+			for (int j = 0; j < translation.size() - 1; j++) {
+				gl::ScopedLineWidth lineWidth(10.0f);
+				gl::drawLine(translation[j], translation[j + 1]);
 			}
-			gl::popModelMatrix();
+			//	gl::translate(translation[0]);
+			//	Helpers::rotateFromBase(i == 0 ? armRootRotation : -armRootRotation,
+			//		vec3(0, 0, 1), vec3(i == 0 ? 0.666 : -0.666, 0, 0)); // T - pose rotation from root
+			//	allRotations(rotations[0], vec3(0, 0.666, 0));
+			//	mArm->draw(); //Shoulder
+			//	gl::pushModelMatrix();
+			//	{
+			//		gl::translate(translation[1]);
+			//		allRotations(rotations[1], vec3(0, 0.666, 0));
+			//		mArm->draw(); // Forearm
+			//		gl::pushModelMatrix();
+			//		{
+			//			gl::translate(translation[2]);
+			//			allRotations(rotations[2], vec3(0, 0.4, 0));
+			//			drawHands(i == 0 ? true : false);
+			//		}
+			//		gl::popModelMatrix();
+			//	}
+			//	gl::popModelMatrix();
 		}
 		gl::popModelMatrix();
 	}
@@ -293,7 +297,7 @@ void Player::draw() {
 	gl::pushModelMatrix();
 	{
 		gl::pushModelMatrix();
-		gl::translate(getCurrentNotePos());
+		gl::translate(getCurrentNotePos(0, 0));
 		gl::scale(2.1, 2.1, 2.1);
 		sampleDot->draw();
 		gl::popModelMatrix();
@@ -304,6 +308,8 @@ void Player::draw() {
 		sampleDot->draw();
 		gl::popModelMatrix();
 
+
+		gl::ScopedLineWidth lineWidth(2.0f);
 		gl::color(1, 0, 0);
 		gl::drawLine(vec3(0, 0, 0), vec3(10, 0, 0));
 
@@ -316,16 +322,14 @@ void Player::draw() {
 		for (int i = 0; i < armPositionL.size(); i++) {
 			gl::pushModelMatrix();
 			gl::translate(armPositionL[i]);
-			gl::scale(0.2, 1.0, 0.2);
-			mArm->draw();
+			sampleDot->draw();
 			gl::popModelMatrix();
 		}
 
 		for (int i = 0; i < armPositionR.size(); i++) {
 			gl::pushModelMatrix();
 			gl::translate(armPositionR[i]);
-			gl::scale(0.2, 1.0, 0.2);
-			mArm->draw();
+			sampleDot->draw();
 			gl::popModelMatrix();
 
 		}
