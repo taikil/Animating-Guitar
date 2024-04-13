@@ -1,7 +1,7 @@
 #include "MusicSimulator.h"
 
 MusicSimulator::MusicSimulator()
-    : beatsPerMinute(120.0f), beatsPerMeasure(4), noteValue(4), timePerBeat(0.0), elapsedTime(0.0), isRunning(false) {
+    : beatsPerMinute(60.0f), beatsPerMeasure(4), noteValue(4), timePerBeat(0.0), elapsedTime(0.0), isRunning(false) {
     calculateTimePerBeat();
 }
 
@@ -27,6 +27,10 @@ void MusicSimulator::stopSimulation() {
     elapsedTime = 0.0;
 }
 
+double MusicSimulator::getTime() {
+    return timer.getSeconds();
+}
+
 void MusicSimulator::update() {
     if (isRunning) {
         double deltaTime = timer.getSeconds();
@@ -41,4 +45,8 @@ void MusicSimulator::update() {
 
 void MusicSimulator::calculateTimePerBeat() {
     timePerBeat = 60.0 / beatsPerMinute;
+}
+
+double MusicSimulator::getTimePerBeat() {
+    return timePerBeat;
 }

@@ -15,6 +15,8 @@ public:
     // Functions to start and stop the simulation
     void startSimulation();
     void stopSimulation();
+    double getTimePerBeat();
+    double getTime();
 
     // Function to update the simulation
     void update();
