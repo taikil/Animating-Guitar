@@ -106,32 +106,12 @@ void Player::drawArms() {
 	//Right Arm i = 0
 	for (int i = 0; i < 2; i++) {
 		std::vector<vec3> translation = i == 0 ? armPositionR : armPositionL;
-		//std::vector<vec3> rotations = i == 0 ? armRotationsR : armRotationsL;
 		gl::pushModelMatrix();
 		{
 			for (int j = 0; j < translation.size() - 1; j++) {
 				gl::ScopedLineWidth lineWidth(10.0f);
 				gl::drawLine(translation[j], translation[j + 1]);
 			}
-			//	gl::translate(translation[0]);
-			//	Helpers::rotateFromBase(i == 0 ? armRootRotation : -armRootRotation,
-			//		vec3(0, 0, 1), vec3(i == 0 ? 0.666 : -0.666, 0, 0)); // T - pose rotation from root
-			//	allRotations(rotations[0], vec3(0, 0.666, 0));
-			//	mArm->draw(); //Shoulder
-			//	gl::pushModelMatrix();
-			//	{
-			//		gl::translate(translation[1]);
-			//		allRotations(rotations[1], vec3(0, 0.666, 0));
-			//		mArm->draw(); // Forearm
-			//		gl::pushModelMatrix();
-			//		{
-			//			gl::translate(translation[2]);
-			//			allRotations(rotations[2], vec3(0, 0.4, 0));
-			//			drawHands(i == 0 ? true : false);
-			//		}
-			//		gl::popModelMatrix();
-			//	}
-			//	gl::popModelMatrix();
 		}
 		gl::popModelMatrix();
 	}
@@ -338,19 +318,20 @@ void Player::draw() {
 
 		gl::pushModelMatrix();
 		{
-			drawBody();
-			drawHead();
-			drawArms();
+			//drawBody();
+			//drawHead();
+			//drawArms();
+			drawHands(false);
 		}
 		gl::popModelMatrix();
-		gl::pushModelMatrix();
-		{
-			gl::translate(1, 1, 1);
-			gl::rotate(angleAxis(float(-M_PI / 4), vec3(0, 0, 1)));
-			guitar.draw();
-			drawFrets();
-		}
-		gl::popModelMatrix();
+		//gl::pushModelMatrix();
+		//{
+		//	gl::translate(1, 1, 1);
+		//	gl::rotate(angleAxis(float(-M_PI / 4), vec3(0, 0, 1)));
+		//	guitar.draw();
+		//	drawFrets();
+		//}
+		//gl::popModelMatrix();
 	}
 	gl::popModelMatrix();
 }

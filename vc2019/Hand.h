@@ -3,6 +3,7 @@
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
+#include "cinder/Log.h" 
 #include "Helpers.h"
 #include <vector>
 
@@ -24,6 +25,7 @@ public:
 	gl::BatchRef mRect;
 	gl::BatchRef mFingers[4][3];
 	gl::BatchRef mThumb[3];
+	gl::BatchRef sampleDot;
 
 private:
 	bool rightHand;

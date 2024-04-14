@@ -39,6 +39,9 @@ void Hand::setup() {
 		mThumb[i] = gl::Batch::create(thumb, shader);
 	}
 
+	auto dot = geom::Sphere().subdivisions(40).radius(0.05);
+	sampleDot = gl::Batch::create(dot, shader);
+
 	//Switch for right hand
 	(rightHand) ? thumbBaseTranslate.x = -thumbBaseTranslate.x : void();
 	(rightHand) ? thumbBaseRotation = -thumbBaseRotation : void();
@@ -158,7 +161,6 @@ void Hand::draw() {
 	}
 	gl::popModelMatrix();
 }
-
 void Hand::popN(int n) {
 	for (int i = 0; i < n; i++) {
 		gl::popModelMatrix();
