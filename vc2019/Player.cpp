@@ -105,13 +105,38 @@ void Player::drawArms() {
 
 	//Right Arm i = 0
 	for (int i = 0; i < 2; i++) {
-		std::vector<vec3> translation = i == 0 ? armPositionR : armPositionL;
+		std::vector<vec3> translation = i == 0 ? armTranslationsR : armTranslationsL;
+		std::vector<vec3> rotations = i == 0 ? armRotationsR : armRotationsL;
 		gl::pushModelMatrix();
 		{
-			for (int j = 0; j < translation.size() - 1; j++) {
-				gl::ScopedLineWidth lineWidth(10.0f);
-				gl::drawLine(translation[j], translation[j + 1]);
+			gl::translate(translation[0]);
+			Helpers::rotateFromBase(i == 0 ? armRootRotation : -armRootRotation,
+				vec3(0, 0, 1), vec3(i == 0 ? 0.666 : -0.666, 0, 0)); // T - pose rotation from root
+			allRotations(rotations[0], vec3(0, 0.666, 0));
+			mArm->draw(); //Shoulder
+			gl::pushModelMatrix();
+			{
+				gl::translate(translation[1]);
+				allRotations(rotations[1], vec3(0, 0.666, 0));
+				mArm->draw(); // Forearm
+				gl::ScopedLineWidth lineWidth(2.0f);
+				gl::color(1, 0, 0);
+				gl::drawLine(vec3(0, 0, 0), vec3(10, 0, 0));
+
+				gl::color(0, 1, 0);
+				gl::drawLine(vec3(0, 0, 0), vec3(0, 10, 0));
+
+				gl::color(0, 0, 1);
+				gl::drawLine(vec3(0, 0, 0), vec3(0, 0, 10));
+				gl::pushModelMatrix();
+				{
+					gl::translate(translation[2]);
+					allRotations(rotations[2], vec3(0, 0.4, 0));
+					drawHands(i == 0 ? true : false);
+				}
+				gl::popModelMatrix();
 			}
+			gl::popModelMatrix();
 		}
 		gl::popModelMatrix();
 	}
@@ -119,8 +144,8 @@ void Player::drawArms() {
 
 void Player::allRotations(vec3 thetas, vec3 distance) {
 	//thetas *= 180 / M_PI;
-	Helpers::rotateFromBase(float(thetas.x), vec3(1, 0, 0), distance);
-	gl::rotate(angleAxis(float(thetas.y), vec3(0, 1, 0)));
+	Helpers::rotateFromBase(float(thetas.y), vec3(1, 0, 0), distance);
+	gl::rotate(angleAxis(float(thetas.x), vec3(0, 1, 0)));
 	Helpers::rotateFromBase(float(thetas.z), vec3(0, 0, 1), distance);
 }
 
@@ -131,11 +156,8 @@ void Player::IKSolver(bool right, const vec3& target_position) {
 		if (glm::length(armPositionR.back() - target_position) < 0.01f) return;
 
 		newPos = fabrik(armPositionR, target_position, distances);
-		newThetas = computeJointRotations(newPos);
+		newThetas = computeJointRotations(newPos, true);
 		vec3 temp = armRotationsR.back();
-		//newThetas[0].y = -newThetas[0].y;
-		newThetas[1].y = 0;
-
 		armRotationsR = newThetas;
 		armRotationsR.push_back(temp);
 	}
@@ -143,14 +165,8 @@ void Player::IKSolver(bool right, const vec3& target_position) {
 		if (glm::length(armPositionL.back() - target_position) < 0.01f) return;
 
 		newPos = fabrik(armPositionL, target_position, distances);
-		newThetas = computeJointRotations(newPos);
+		newThetas = computeJointRotations(newPos, false);
 		vec3 temp = armRotationsL.back();
-		//newThetas[0].x = -newThetas[0].x;
-		//newThetas[1].x = -newThetas[1].x;
-		//newThetas[0].y = -newThetas[0].y;
-		newThetas[1].y = 0;
-		newThetas[0].z = -newThetas[0].z;
-		newThetas[1].z = -newThetas[1].z;
 		armRotationsL = newThetas;
 		armRotationsL.push_back(temp);
 	}
@@ -195,23 +211,41 @@ std::vector<vec3> Player::fabrik(std::vector<vec3>& p, const vec3& t, const std:
 	return p;
 }
 
-std::vector<glm::vec3> Player::computeJointRotations(const std::vector<glm::vec3>& joint_positions) {
+std::vector<glm::vec3> Player::computeJointRotations(const std::vector<glm::vec3>& joint_positions, bool right) {
 	std::vector<glm::vec3> joint_rotations;
 
 	// Iterate over each joint position
 	for (size_t i = 0; i < joint_positions.size() - 1; ++i) {
 		// Calculate the direction vector between the current joint and the next joint
 		glm::vec3 direction = glm::normalize(joint_positions[i + 1] - joint_positions[i]);
-
-		// Calculate the rotation angles using trigonometry
-		float y = std::atan2(direction.y, direction.z); //swapped because of earlier rotation
-		float x = std::atan2(direction.x, direction.z);
-		float z = std::atan2(direction.x, direction.y);
+		float x, y, z;
+		// X and Y are swapped
+		if (right) {
+			//Right has +x, -y, +z
+			x = std::atan2(direction.z, direction.y); //swapped because of earlier rotation
+			y = std::atan2(direction.z, direction.x);
+			z = std::atan2(direction.y, direction.x);
+			//x *= -1;
+			/*	x = atan2(direction.y, direction.z);
+				y = -atan2(direction.x, sqrt(direction.y * direction.y + direction.z * direction.z));
+				vec3 projectedDirection = direction;
+				projectedDirection.z = 0.0f;
+				projectedDirection = normalize(projectedDirection);
+				z = atan2(projectedDirection.y, projectedDirection.x);*/
+		}
+		else {
+			//Left has - x, +y, +z
+			x = std::atan2(direction.z, direction.y);
+			y = std::atan2(direction.z, direction.x);
+			z = std::atan2(direction.y, direction.x);
+			x *= -1;
+			y *= -1;
+		}
 
 		joint_rotations.push_back(glm::vec3(x, y, z));
 	}
 
-	for (int i = joint_rotations.size() - 1; i > 0; i--) {
+	for (int i = 1; i < joint_rotations.size(); i++) {
 		joint_rotations[i] -= joint_rotations[i - 1]; // get into it's own coordinates
 	}
 
@@ -301,6 +335,7 @@ void Player::draw() {
 
 		for (int i = 0; i < armPositionL.size(); i++) {
 			gl::pushModelMatrix();
+			if (i != armPositionL.size() - 1) gl::drawLine(armPositionL[i], armPositionL[i + 1]);
 			gl::translate(armPositionL[i]);
 			gl::scale(3.1, 3.1, 3.1);
 			sampleDot->draw();
@@ -309,6 +344,7 @@ void Player::draw() {
 
 		for (int i = 0; i < armPositionR.size(); i++) {
 			gl::pushModelMatrix();
+			if (i != armPositionR.size() - 1) gl::drawLine(armPositionR[i], armPositionR[i + 1]);
 			gl::translate(armPositionR[i]);
 			gl::scale(3.1, 3.1, 3.1);
 			sampleDot->draw();
@@ -318,20 +354,19 @@ void Player::draw() {
 
 		gl::pushModelMatrix();
 		{
-			//drawBody();
-			//drawHead();
-			//drawArms();
-			drawHands(false);
+			drawBody();
+			drawHead();
+			drawArms();
 		}
 		gl::popModelMatrix();
-		//gl::pushModelMatrix();
-		//{
-		//	gl::translate(1, 1, 1);
-		//	gl::rotate(angleAxis(float(-M_PI / 4), vec3(0, 0, 1)));
-		//	guitar.draw();
-		//	drawFrets();
-		//}
-		//gl::popModelMatrix();
+		gl::pushModelMatrix();
+		{
+			gl::translate(1, 1, 1);
+			gl::rotate(angleAxis(float(-M_PI / 4), vec3(0, 0, 1)));
+			guitar.draw();
+			drawFrets();
+		}
+		gl::popModelMatrix();
 	}
 	gl::popModelMatrix();
 }

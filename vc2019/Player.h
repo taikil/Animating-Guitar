@@ -28,7 +28,7 @@ public:
 	void allRotations(vec3 thetas, vec3 distance);
 
 
-	std::vector<vec3> computeJointRotations(const std::vector<glm::vec3>& joint_positions);
+	std::vector<vec3> computeJointRotations(const std::vector<glm::vec3>& joint_positions, bool right);
 	std::vector<vec3> computeJointPositions(const std::vector<vec3>& translations, const std::vector<float>& distances, const std::vector<vec3>& rotations);
 	vec3 getCurrentNotePos(int a, int b);
 	vec3 getCurrentEndPos(bool right);
